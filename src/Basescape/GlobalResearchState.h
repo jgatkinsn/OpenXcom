@@ -32,28 +32,24 @@ class Base;
  * Research screen that lets the player manage
  * all the researching operations of a base.
  */
-class ResearchState : public State
+class GlobalResearchState : public State
 {
 private:
 	Base *_base;
-	TextButton *_btnNew, *_btnOk;
+	TextButton *_btnOk;
 	Window *_window;
-	Text *_txtTitle, *_txtAvailable, *_txtAllocated, *_txtSpace, *_txtProject, *_txtScientists, *_txtProgress;
+	Text *_txtTitle, *_txtProject, *_txtScientists, *_txtProgress, *_txtBase;
 	TextList *_lstResearch;
+	std::vector<Base*> *_bases;
 public:
 	/// Creates the Research state.
-	ResearchState(Base *base);
+	GlobalResearchState(Base *base);
 	/// Cleans up the Research state.
-	~ResearchState();
+	~GlobalResearchState();
 	/// Handler for clicking the OK button.
 	void btnOkClick(Action *action);
-	/// Handler for clicking the New Research button.
-	void btnNewClick(Action *action);
 	/// Handler for clicking the ResearchProject list.
-	void onSelectProject(Action *action);
-	void onOpenTechTreeViewer(Action *action);
-    /// Handler for opening the Global Current Research
-	void onCurrentGlobalResearchClick(Action *action);
+	void onSelectBase(Action *action);
 	/// Fills the ResearchProject list with Base ResearchProjects.
 	void fillProjectList();
 	/// Updates the research list.

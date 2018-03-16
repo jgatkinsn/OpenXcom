@@ -309,6 +309,8 @@ void create()
 	_info.push_back(OptionInfo("keyGraphsZoomIn", &keyGraphsZoomIn, SDLK_KP_PLUS, "STR_GRAPHS_ZOOM_IN", "STR_OXCE"));
 	_info.push_back(OptionInfo("keyGraphsZoomOut", &keyGraphsZoomOut, SDLK_KP_MINUS, "STR_GRAPHS_ZOOM_OUT", "STR_OXCE"));
 
+	_info.push_back(OptionInfo("keyCurrentGlobalResearch", &keyCurrentGlobalResearch, SDLK_c, "STR_CURRENT_GLOBAL_RESEARCH", "STR_OXCE"));
+
 	_info.push_back(OptionInfo("keyToggleQuickSearch", &keyToggleQuickSearch, SDLK_q, "STR_TOGGLE_QUICK_SEARCH", "STR_OXCE"));
 	_info.push_back(OptionInfo("keyCraftLoadoutSave", &keyCraftLoadoutSave, SDLK_F5, "STR_SAVE_CRAFT_LOADOUT_TEMPLATE", "STR_OXCE"));
 	_info.push_back(OptionInfo("keyCraftLoadoutLoad", &keyCraftLoadoutLoad, SDLK_F9, "STR_LOAD_CRAFT_LOADOUT_TEMPLATE", "STR_OXCE"));
