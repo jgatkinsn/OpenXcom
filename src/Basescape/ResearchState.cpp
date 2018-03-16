@@ -161,7 +161,7 @@ void ResearchState::onOpenTechTreeViewer(Action *)
 */
 void ResearchState::onCurrentGlobalResearchClick(Action *)
 {
-	_game->pushState(new GlobalResearchState(_base));
+	_game->pushState(new GlobalResearchState());
 }
 /**
  * Updates the research list

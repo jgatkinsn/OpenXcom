@@ -35,7 +35,6 @@ class Base;
 class GlobalResearchState : public State
 {
 private:
-	Base *_base;
 	TextButton *_btnOk;
 	Window *_window;
 	Text *_txtTitle, *_txtProject, *_txtScientists, *_txtProgress, *_txtBase;
@@ -43,7 +42,7 @@ private:
 	std::vector<Base*> *_bases;
 public:
 	/// Creates the Research state.
-	GlobalResearchState(Base *base);
+	GlobalResearchState();
 	/// Cleans up the Research state.
 	~GlobalResearchState();
 	/// Handler for clicking the OK button.

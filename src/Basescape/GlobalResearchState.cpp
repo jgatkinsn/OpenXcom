@@ -40,7 +40,7 @@ namespace OpenXcom
  * @param game Pointer to the core game.
  * @param base Pointer to the base to get info from.
  */
-GlobalResearchState::GlobalResearchState(Base *base) : _base(base)
+GlobalResearchState::GlobalResearchState()  
 {
 	// Create objects
 	_window = new Window(this, 320, 200, 0, 0);
@@ -55,16 +55,16 @@ GlobalResearchState::GlobalResearchState(Base *base) : _base(base)
 
 
 	// Set palette
-	setInterface("globalResearchMenu");
+	setInterface("ResearchMenu");
 
-	add(_window, "window", "globalResearchMenu");
+	add(_window, "window", "ResearchMenu");
 	add(_btnOk, "button", "researchMenu");
-	add(_txtTitle, "text", "globalResearchMenu");
-	add(_txtProject, "text", "globalResearchMenu");
-	add(_txtScientists, "text", "globalResearchMenu");
-	add(_txtProgress, "text", "globalResearchMenu");
-	add(_txtBase, "text", "globalResearchMenu");
-	add(_lstResearch, "list", "globalResearchMenu");
+	add(_txtTitle, "text", "ResearchMenu");
+	add(_txtProject, "text", "ResearchMenu");
+	add(_txtScientists, "text", "ResearchMenu");
+	add(_txtProgress, "text", "ResearchMenu");
+	add(_txtBase, "text", "ResearchMenu");
+	add(_lstResearch, "list", "ResearchMenu");
 
 	centerAllSurfaces();
 
