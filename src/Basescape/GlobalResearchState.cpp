@@ -43,14 +43,14 @@ namespace OpenXcom
 GlobalResearchState::GlobalResearchState()  
 {
 	// Create objects
-	_window = new Window(this, 320, 200, 0, 0);
+	_window = new Window(this, 500, 200, 0, 0);
 	_btnOk = new TextButton(148, 16, 164, 176);
-	_txtTitle = new Text(310, 17, 5, 8);
+	_txtTitle = new Text(400, 17, 5, 8);
 	_txtProject = new Text(110, 17, 10, 44);
 	_txtScientists = new Text(106, 17, 120, 44);
 	_txtProgress = new Text(84, 9, 226, 44);
     //FIXME: Set location (may have to shift those above to fit the string)
-	_txtBase = new Text(84, 9, 226, 44);
+	_txtBase = new Text(120, 9, 310, 44);
 	_lstResearch = new TextList(288, 112, 8, 62);
 
 
