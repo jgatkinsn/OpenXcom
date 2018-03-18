@@ -17,6 +17,9 @@
     <ClCompile Include="Basescape\ResearchState.cpp">
       <Filter>Basescape</Filter>
     </ClCompile>
+    <ClCompile Include="Basescape\GlobalResearchState.cpp">
+      <Filter>Basescape</Filter>
+    </ClCompile>
     <ClCompile Include="Basescape\SackSoldierState.cpp">
       <Filter>Basescape</Filter>
     </ClCompile>
@@ -1067,6 +1070,9 @@
       <Filter>Basescape</Filter>
     </ClInclude>
     <ClInclude Include="Basescape\ResearchState.h">
+      <Filter>Basescape</Filter>
+    </ClInclude>
+    <ClInclude Include="Basescape\GlobalResearchState.h">
       <Filter>Basescape</Filter>
     </ClInclude>
     <ClInclude Include="Basescape\SackSoldierState.h">
