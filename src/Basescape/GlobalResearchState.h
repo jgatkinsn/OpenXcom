@@ -40,9 +40,10 @@ private:
 	Text *_txtTitle, *_txtProject, *_txtScientists, *_txtProgress, *_txtBase;
 	TextList *_lstResearch;
 	std::vector<Base*> _bases;
+    bool _fromBase;
 public:
 	/// Creates the Research state.
-	GlobalResearchState();
+	GlobalResearchState(bool fromBase);
 	/// Cleans up the Research state.
 	~GlobalResearchState();
 	/// Handler for clicking the OK button.

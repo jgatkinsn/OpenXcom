@@ -40,7 +40,7 @@ namespace OpenXcom
  * @param game Pointer to the core game.
  * @param base Pointer to the base to get info from.
  */
-GlobalResearchState::GlobalResearchState()  
+GlobalResearchState::GlobalResearchState(bool fromBase) : _fromBase(fromBase)
 {
 	// Create objects
 	_window = new Window(this, 320, 200, 0, 0);
@@ -124,6 +124,9 @@ void GlobalResearchState::btnOkClick(Action *)
  */
 void GlobalResearchState::onSelectBase(Action *)
 {
+    if(_fromBase)
+        _game->popState();
+    _game->popState();
 	_game->pushState(new ResearchState(_bases[_lstResearch->getSelectedRow()])); 
 }
 
