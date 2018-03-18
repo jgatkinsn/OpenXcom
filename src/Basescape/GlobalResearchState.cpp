@@ -44,14 +44,14 @@ GlobalResearchState::GlobalResearchState()
 {
 	// Create objects
 	_window = new Window(this, 320, 200, 0, 0);
-	_btnOk = new TextButton(148, 16, 164, 176);
+	_btnOk = new TextButton(148, 16, 82, 176);
 	_txtTitle = new Text(310, 17, 5, 8);
 
 	_txtProject = new Text(110, 17, 10, 44);
-	_txtScientists = new Text(84, 17, 120, 44);
-	_txtProgress = new Text(50, 9, 204, 44);
+	_txtScientists = new Text(59, 17, 130, 44);
+	_txtProgress = new Text(50, 9, 189, 44);
     //FIXME: Set location (may have to shift those above to fit the string)
-	_txtBase = new Text(30, 9, 254, 44);
+	_txtBase = new Text(30, 9, 239, 44);
 	_lstResearch = new TextList(288, 112, 8, 62);
 
 
@@ -92,7 +92,7 @@ GlobalResearchState::GlobalResearchState()
 	_txtBase->setText(tr("STR_BASE"));
 
     //JGA this is the list 
-	_lstResearch->setColumns(4, 158, 58, 70, 70);
+	_lstResearch->setColumns(4, 138, 43, 50, 55);
 	_lstResearch->setSelectable(true);
 	_lstResearch->setBackground(_window);
 	_lstResearch->setMargin(2);
