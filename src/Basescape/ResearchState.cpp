@@ -52,6 +52,7 @@ ResearchState::ResearchState(Base *base) : _base(base)
 	_txtAvailable = new Text(150, 9, 10, 24);
 	_txtAllocated = new Text(150, 9, 160, 24);
 	_txtSpace = new Text(300, 9, 10, 34);
+
 	_txtProject = new Text(110, 17, 10, 44);
 	_txtScientists = new Text(106, 17, 120, 44);
 	_txtProgress = new Text(84, 9, 226, 44);

@@ -43,28 +43,29 @@ namespace OpenXcom
 GlobalResearchState::GlobalResearchState()  
 {
 	// Create objects
-	_window = new Window(this, 500, 200, 0, 0);
+	_window = new Window(this, 320, 200, 0, 0);
 	_btnOk = new TextButton(148, 16, 164, 176);
-	_txtTitle = new Text(400, 17, 5, 8);
+	_txtTitle = new Text(310, 17, 5, 8);
+
 	_txtProject = new Text(110, 17, 10, 44);
-	_txtScientists = new Text(106, 17, 120, 44);
-	_txtProgress = new Text(84, 9, 226, 44);
+	_txtScientists = new Text(84, 17, 120, 44);
+	_txtProgress = new Text(50, 9, 204, 44);
     //FIXME: Set location (may have to shift those above to fit the string)
-	_txtBase = new Text(120, 9, 310, 44);
+	_txtBase = new Text(30, 9, 254, 44);
 	_lstResearch = new TextList(288, 112, 8, 62);
 
 
 	// Set palette
-	setInterface("ResearchMenu");
+	setInterface("researchMenu");
 
-	add(_window, "window", "ResearchMenu");
+	add(_window, "window", "researchMenu");
 	add(_btnOk, "button", "researchMenu");
-	add(_txtTitle, "text", "ResearchMenu");
-	add(_txtProject, "text", "ResearchMenu");
-	add(_txtScientists, "text", "ResearchMenu");
-	add(_txtProgress, "text", "ResearchMenu");
-	add(_txtBase, "text", "ResearchMenu");
-	add(_lstResearch, "list", "ResearchMenu");
+	add(_txtTitle, "text", "researchMenu");
+	add(_txtProject, "text", "researchMenu");
+	add(_txtScientists, "text", "researchMenu");
+	add(_txtProgress, "text", "researchMenu");
+	add(_txtBase, "text", "researchMenu");
+	add(_lstResearch, "list", "researchMenu");
 
 	centerAllSurfaces();
 
@@ -123,8 +124,7 @@ void GlobalResearchState::btnOkClick(Action *)
  */
 void GlobalResearchState::onSelectBase(Action *)
 {
-//	_game->pushState(new ResearchState(&_bases[_lstResearch->getSelectedRow()]));
-	_game->pushState(new ResearchState(_bases->at(_lstResearch->getSelectedRow()))); 
+	_game->pushState(new ResearchState(_bases[_lstResearch->getSelectedRow()])); 
 }
 
 /**
@@ -142,11 +142,9 @@ void GlobalResearchState::init()
  */
 void GlobalResearchState::fillProjectList()
 {
-    //store the list of bases (for mouse click)
-    _bases = _game->getSavedGame()->getBases();
 	_lstResearch->clearList();
     //grab all the bases than walk their projects
-	for (std::vector<Base*>::iterator bIter = _bases->begin(); bIter != _bases->end(); ++bIter)
+	for (std::vector<Base*>::iterator bIter = _game->getSavedGame()->getBases()->begin(); bIter != _game->getSavedGame()->getBases()->end(); ++bIter)
     {
         const std::vector<ResearchProject *> & baseProjects((*bIter)->getResearch());
         for (std::vector<ResearchProject *>::const_iterator iter = baseProjects.begin(); iter != baseProjects.end(); ++iter)
@@ -158,6 +156,8 @@ void GlobalResearchState::fillProjectList()
             std::wstring wstr = tr(r->getName());
             _lstResearch->addRow(4, wstr.c_str(), sstr.str().c_str(), tr((*iter)->getResearchProgress()).c_str(), 
                                  (*bIter)->getName(_game->getLanguage()).c_str());
+            //store the list of bases (for mouse click)
+            _bases.push_back(*bIter);
         }
     }
 }

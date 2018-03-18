@@ -39,7 +39,7 @@ private:
 	Window *_window;
 	Text *_txtTitle, *_txtProject, *_txtScientists, *_txtProgress, *_txtBase;
 	TextList *_lstResearch;
-	std::vector<Base*> *_bases;
+	std::vector<Base*> _bases;
 public:
 	/// Creates the Research state.
 	GlobalResearchState();
