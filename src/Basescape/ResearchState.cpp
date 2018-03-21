@@ -52,7 +52,6 @@ ResearchState::ResearchState(Base *base) : _base(base)
 	_txtAvailable = new Text(150, 9, 10, 24);
 	_txtAllocated = new Text(150, 9, 160, 24);
 	_txtSpace = new Text(300, 9, 10, 34);
-
 	_txtProject = new Text(110, 17, 10, 44);
 	_txtScientists = new Text(106, 17, 120, 44);
 	_txtProgress = new Text(84, 9, 226, 44);
@@ -81,7 +80,7 @@ ResearchState::ResearchState(Base *base) : _base(base)
 	_btnNew->setText(tr("STR_NEW_PROJECT"));
 	_btnNew->onMouseClick((ActionHandler)&ResearchState::btnNewClick);
 	_btnNew->onKeyboardPress((ActionHandler)&ResearchState::btnNewClick, Options::keyToggleQuickSearch);
-	_btnNew->onKeyboardPress((ActionHandler)&ResearchState::onCurrentGlobalResearchClick, Options::keyCurrentGlobalResearch);
+	_btnNew->onKeyboardPress((ActionHandler)&ResearchState::onCurrentGlobalResearchClick, Options::keyGeoGlobalResearch);
 
 	_btnOk->setText(tr("STR_OK"));
 	_btnOk->onMouseClick((ActionHandler)&ResearchState::btnOkClick);
@@ -157,9 +156,9 @@ void ResearchState::onOpenTechTreeViewer(Action *)
 }
 
 /**
-* Opens the CurrentGlobalResearch 
-* @param action Pointer to an action.
-*/
+ * Opens the Current Global Research UI.
+ * @param action Pointer to an action.
+ */
 void ResearchState::onCurrentGlobalResearchClick(Action *)
 {
 	_game->pushState(new GlobalResearchState(true));

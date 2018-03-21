@@ -1,6 +1,6 @@
 #pragma once
 /*
- * Copyright 2010-2016 OpenXcom Developers.
+ * Copyright 2010-2018 OpenXcom Developers.
  *
  * This file is part of OpenXcom.
  *
@@ -29,28 +29,29 @@ class TextList;
 class Base;
 
 /**
- * Research screen that lets the player manage
- * all the researching operations of a base.
+ * Global Research screen that provides overview
+ * of the ongoing research operations in all the bases.
  */
 class GlobalResearchState : public State
 {
 private:
 	TextButton *_btnOk;
 	Window *_window;
-	Text *_txtTitle, *_txtProject, *_txtScientists, *_txtProgress, *_txtBase;
+	Text *_txtTitle, *_txtAvailable, *_txtAllocated, *_txtSpace, *_txtProject, *_txtScientists, *_txtProgress;
 	TextList *_lstResearch;
+
 	std::vector<Base*> _bases;
-    bool _fromBase;
+    bool _openedFromBasescape;
 public:
-	/// Creates the Research state.
-	GlobalResearchState(bool fromBase);
-	/// Cleans up the Research state.
+	/// Creates the GlobalResearchState.
+	GlobalResearchState(bool openedFromBasescape);
+	/// Cleans up the GlobalResearchState.
 	~GlobalResearchState();
 	/// Handler for clicking the OK button.
 	void btnOkClick(Action *action);
 	/// Handler for clicking the ResearchProject list.
 	void onSelectBase(Action *action);
-	/// Fills the ResearchProject list with Base ResearchProjects.
+	/// Fills the list with ResearchProjects from all bases.
 	void fillProjectList();
 	/// Updates the research list.
 	void init();

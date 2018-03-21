@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2016 OpenXcom Developers.
+ * Copyright 2010-2018 OpenXcom Developers.
  *
  * This file is part of OpenXcom.
  *
@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <sstream>
 #include "GlobalResearchState.h"
+#include <sstream>
 #include "../Engine/Game.h"
 #include "../Mod/Mod.h"
 #include "../Engine/LocalizedText.h"
@@ -36,36 +36,35 @@ namespace OpenXcom
 {
 
 /**
- * Initializes all the elements in the Research screen.
- * @param game Pointer to the core game.
- * @param base Pointer to the base to get info from.
+ * Initializes all the elements in the GlobalResearch screen.
  */
-GlobalResearchState::GlobalResearchState(bool fromBase) : _fromBase(fromBase)
+GlobalResearchState::GlobalResearchState(bool openedFromBasescape) : _openedFromBasescape(openedFromBasescape)
 {
 	// Create objects
 	_window = new Window(this, 320, 200, 0, 0);
-	_btnOk = new TextButton(148, 16, 82, 176);
+	_btnOk = new TextButton(304, 16, 8, 176);
 	_txtTitle = new Text(310, 17, 5, 8);
-
+	_txtAvailable = new Text(150, 9, 10, 24);
+	_txtAllocated = new Text(150, 9, 160, 24);
+	_txtSpace = new Text(300, 9, 10, 34);
 	_txtProject = new Text(110, 17, 10, 44);
-	_txtScientists = new Text(59, 17, 130, 44);
-	_txtProgress = new Text(50, 9, 189, 44);
-    //FIXME: Set location (may have to shift those above to fit the string)
-	_txtBase = new Text(30, 9, 239, 44);
+	_txtScientists = new Text(106, 17, 120, 44);
+	_txtProgress = new Text(84, 9, 226, 44);
 	_lstResearch = new TextList(288, 112, 8, 62);
 
-
 	// Set palette
-	setInterface("researchMenu");
+	setInterface("globalResearchMenu");
 
-	add(_window, "window", "researchMenu");
-	add(_btnOk, "button", "researchMenu");
-	add(_txtTitle, "text", "researchMenu");
-	add(_txtProject, "text", "researchMenu");
-	add(_txtScientists, "text", "researchMenu");
-	add(_txtProgress, "text", "researchMenu");
-	add(_txtBase, "text", "researchMenu");
-	add(_lstResearch, "list", "researchMenu");
+	add(_window, "window", "globalResearchMenu");
+	add(_btnOk, "button", "globalResearchMenu");
+	add(_txtTitle, "text", "globalResearchMenu");
+	add(_txtAvailable, "text", "globalResearchMenu");
+	add(_txtAllocated, "text", "globalResearchMenu");
+	add(_txtSpace, "text", "globalResearchMenu");
+	add(_txtProject, "text", "globalResearchMenu");
+	add(_txtScientists, "text", "globalResearchMenu");
+	add(_txtProgress, "text", "globalResearchMenu");
+	add(_lstResearch, "list", "globalResearchMenu");
 
 	centerAllSurfaces();
 
@@ -76,10 +75,9 @@ GlobalResearchState::GlobalResearchState(bool fromBase) : _fromBase(fromBase)
 	_btnOk->onMouseClick((ActionHandler)&GlobalResearchState::btnOkClick);
 	_btnOk->onKeyboardPress((ActionHandler)&GlobalResearchState::btnOkClick, Options::keyCancel);
 
-
 	_txtTitle->setBig();
 	_txtTitle->setAlign(ALIGN_CENTER);
-	_txtTitle->setText(tr("STR_CURRENT_GLOBAL_RESEARCH"));
+	_txtTitle->setText(tr("STR_RESEARCH_OVERVIEW"));
 
 	_txtProject->setWordWrap(true);
 	_txtProject->setText(tr("STR_RESEARCH_PROJECT"));
@@ -89,17 +87,12 @@ GlobalResearchState::GlobalResearchState(bool fromBase) : _fromBase(fromBase)
 
 	_txtProgress->setText(tr("STR_PROGRESS"));
 
-	_txtBase->setText(tr("STR_BASE"));
-
-    //JGA this is the list 
-	_lstResearch->setColumns(4, 138, 43, 50, 55);
+	_lstResearch->setColumns(3, 158, 58, 70);
 	_lstResearch->setSelectable(true);
 	_lstResearch->setBackground(_window);
 	_lstResearch->setMargin(2);
 	_lstResearch->setWordWrap(true);
-    //add the button click on project to open base research screen
 	_lstResearch->onMouseClick((ActionHandler)&GlobalResearchState::onSelectBase);
-	fillProjectList();
 }
 
 /**
@@ -124,10 +117,22 @@ void GlobalResearchState::btnOkClick(Action *)
  */
 void GlobalResearchState::onSelectBase(Action *)
 {
-    if(_fromBase)
-        _game->popState();
-    _game->popState();
-	_game->pushState(new ResearchState(_bases[_lstResearch->getSelectedRow()])); 
+	Base *base = _bases[_lstResearch->getSelectedRow()];
+
+	if (base)
+	{
+		// close this window
+		_game->popState();
+
+		// close Research UI (goes back to BaseView)
+		if (_openedFromBasescape)
+		{
+			_game->popState();
+		}
+
+		// open new window
+		_game->pushState(new ResearchState(base));
+	}
 }
 
 /**
@@ -141,28 +146,48 @@ void GlobalResearchState::init()
 }
 
 /**
- * Fills the list with all the Bases Research Projects and progress. 
+ * Fills the list with ResearchProjects from all bases. Also updates total count of available lab space and available/allocated scientists.
  */
 void GlobalResearchState::fillProjectList()
 {
+	_bases.clear();
 	_lstResearch->clearList();
-    //grab all the bases than walk their projects
-	for (std::vector<Base*>::iterator bIter = _game->getSavedGame()->getBases()->begin(); bIter != _game->getSavedGame()->getBases()->end(); ++bIter)
-    {
-        const std::vector<ResearchProject *> & baseProjects((*bIter)->getResearch());
-        for (std::vector<ResearchProject *>::const_iterator iter = baseProjects.begin(); iter != baseProjects.end(); ++iter)
-        {
-            std::wostringstream sstr;
-            sstr << (*iter)->getAssigned();
-            const RuleResearch *r = (*iter)->getRules();
 
-            std::wstring wstr = tr(r->getName());
-            _lstResearch->addRow(4, wstr.c_str(), sstr.str().c_str(), tr((*iter)->getResearchProgress()).c_str(), 
-                                 (*bIter)->getName(_game->getLanguage()).c_str());
-            //store the list of bases (for mouse click)
-            _bases.push_back(*bIter);
-        }
-    }
+	int availableScientists = 0;
+	int allocatedScientists = 0;
+	int freeLaboratories = 0;
+
+	for (Base *base : *_game->getSavedGame()->getBases())
+	{
+		const std::vector<ResearchProject *> & baseProjects(base->getResearch());
+		if (!baseProjects.empty())
+		{
+			std::wstring baseName = base->getName(_game->getLanguage());
+			_lstResearch->addRow(3, baseName.c_str(), L"", L"");
+			_lstResearch->setRowColor(_lstResearch->getTexts() - 1, _lstResearch->getSecondaryColor());
+
+			_bases.push_back(0); // dummy
+		}
+		for (std::vector<ResearchProject *>::const_iterator iter = baseProjects.begin(); iter != baseProjects.end(); ++iter)
+		{
+			std::wostringstream sstr;
+			sstr << (*iter)->getAssigned();
+			const RuleResearch *r = (*iter)->getRules();
+
+			std::wstring wstr = tr(r->getName());
+			_lstResearch->addRow(3, wstr.c_str(), sstr.str().c_str(), tr((*iter)->getResearchProgress()).c_str());
+
+			_bases.push_back(base);
+		}
+
+		availableScientists += base->getAvailableScientists();
+		allocatedScientists += base->getAllocatedScientists();
+		freeLaboratories += base->getFreeLaboratories();
+	}
+
+	_txtAvailable->setText(tr("STR_SCIENTISTS_AVAILABLE").arg(availableScientists));
+	_txtAllocated->setText(tr("STR_SCIENTISTS_ALLOCATED").arg(allocatedScientists));
+	_txtSpace->setText(tr("STR_LABORATORY_SPACE_AVAILABLE").arg(freeLaboratories));
 }
 
 }

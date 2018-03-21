@@ -52,7 +52,7 @@ public:
 	/// Handler for clicking the ResearchProject list.
 	void onSelectProject(Action *action);
 	void onOpenTechTreeViewer(Action *action);
-    /// Handler for opening the Global Current Research
+    /// Handler for opening the Current Global Research UI.
 	void onCurrentGlobalResearchClick(Action *action);
 	/// Fills the ResearchProject list with Base ResearchProjects.
 	void fillProjectList();
