@@ -206,6 +206,8 @@ en-US:
   STR_UFO_LANDING_ALERT_DESC: "If enabled, a message will pop up each time a detected UFO lands."
   STR_FRIENDLY_CRAFT_ESCORT: "Friendly craft escort"
   STR_FRIENDLY_CRAFT_ESCORT_DESC: "Allows your craft to follow and provide air defense for other craft in the Geoscape."
+  STR_HIDDEN_PURCHASE_ITEMS: "Hide purchase items"
+  STR_HIDDEN_PURCHASE_ITEMS_DESC: "Use right click to hide/unhide an item from the purchase list. New Hidden Items category"
   STR_GRAPHS_ZOOM_IN: "Zoom In (Graphs)"
   STR_GRAPHS_ZOOM_OUT: "Zoom Out (Graphs)"
   STR_MARK_ALL_AS_SEEN: "Mark All As Seen"

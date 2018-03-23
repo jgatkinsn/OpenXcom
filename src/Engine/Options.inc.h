@@ -66,6 +66,7 @@ OPT bool techTreeViewerSpoilerProtection;
 OPT bool playBriefingMusicDuringEquipment;
 OPT bool ufoLandingAlert;
 OPT bool friendlyCraftEscort;
+OPT bool hiddenPurchaseItems;
 
 // Extra hidden flags (Meridian's build)
 OPT bool simpleUppercase;

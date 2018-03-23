@@ -136,6 +136,10 @@ PurchaseState::PurchaseState(Base *base) : _base(base), _sel(0), _total(0), _pQt
 	_lstItems->onMousePress((ActionHandler)&PurchaseState::lstItemsMousePress);
 
 	_cats.push_back("STR_ALL_ITEMS");
+    if(Options::hiddenPurchaseItems)
+    {
+        _cats.push_back("STR_HIDDEN_ITEMS");
+    }
 
 	const std::vector<std::string> &cw = _game->getMod()->getCraftWeaponsList();
 	for (std::vector<std::string>::const_iterator i = cw.begin(); i != cw.end(); ++i)
@@ -236,6 +240,10 @@ PurchaseState::PurchaseState(Base *base) : _base(base), _sel(0), _total(0), _pQt
 		// then use them nicely in order
 		_cats.clear();
 		_cats.push_back("STR_ALL_ITEMS");
+        if(Options::hiddenPurchaseItems)
+        {
+            _cats.push_back("STR_HIDDEN_ITEMS");
+        }
 		const std::vector<std::string> &categories = _game->getMod()->getItemCategoriesList();
 		for (std::vector<std::string>::const_iterator k = categories.begin(); k != categories.end(); ++k)
 		{
@@ -343,6 +351,40 @@ bool PurchaseState::belongsToCategory(int sel, const std::string &cat) const
 	}
 	return false;
 }
+/**
+ * Determines if a row item is supposed to be hidden
+ * @param sel Selected row.
+ * @param cat Category.
+ * @returns True if row item is hidden
+ */
+bool PurchaseState::isHidden(int sel) const
+{
+	switch (_items[sel].type)
+	{
+	case TRANSFER_SOLDIER:
+	case TRANSFER_SCIENTIST:
+	case TRANSFER_ENGINEER:
+	case TRANSFER_CRAFT:
+		return false;
+	case TRANSFER_ITEM:
+        std::map<std::string,bool>::const_iterator iter;
+		RuleItem *rule = (RuleItem*)_items[sel].rule;
+        std::map<std::string, bool> hiddenMap = _game->getSavedGame()->getHiddenPurchaseItems();
+        iter = hiddenMap.find(rule->getName());
+        if(iter != hiddenMap.end())
+        {
+            return iter->second;
+        }
+        else
+        {
+            //not found, so assume it's not hidden
+            _game->getSavedGame()->setHiddenPurchaseItemsStatus(rule->getName(), false);
+            return false;
+        }
+	}
+	return false;
+
+}
 
 /**
 * Quick search toggle.
@@ -387,7 +429,18 @@ void PurchaseState::updateList()
 	{
 		// filter
 		std::string cat = _cats[_cbxCategory->getSelected()];
-		if (_game->getMod()->getUseCustomCategories())
+        if(cat == "STR_HIDDEN_ITEMS" && Options::hiddenPurchaseItems )
+        {
+            if(isHidden(i) == false)
+            {
+                continue;
+            }
+        }
+        else if(isHidden(i) && Options::hiddenPurchaseItems)
+        {
+            continue;
+        }
+		else if (_game->getMod()->getUseCustomCategories())
 		{
 			if (cat != "STR_ALL_ITEMS" && !belongsToCategory(i, cat))
 			{
@@ -631,6 +684,36 @@ void PurchaseState::lstItemsMousePress(Action *action)
 			}
 		}
 	}
+	else if (action->getDetails()->button.button == SDL_BUTTON_RIGHT && Options::hiddenPurchaseItems)
+	{
+        //only toggle hidden on items
+		if (getRow().type == TRANSFER_ITEM)
+        {
+			RuleItem *rule = (RuleItem*)getRow().rule;
+			if (rule != 0)
+			{
+                std::map<std::string,bool>::iterator iter;
+                std::string itemName = rule->getName();
+                std::map<std::string, bool> hiddenMap = _game->getSavedGame()->getHiddenPurchaseItems();
+                iter = hiddenMap.find(itemName);
+                if(iter != hiddenMap.end())
+                {
+                    //flip it
+                    _game->getSavedGame()->setHiddenPurchaseItemsStatus(itemName, !iter->second);
+                    //update screen
+                    size_t scrollPos = _lstItems->getScroll();
+                    updateList();
+                    _lstItems->scrollTo(scrollPos);
+                }
+                else
+                {
+                    //not found, so assume it's not hidden
+                    _game->getSavedGame()->setHiddenPurchaseItemsStatus(itemName, false);
+                }
+			}
+
+        }
+    }
 }
 
 /**

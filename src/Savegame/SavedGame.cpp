@@ -767,6 +767,11 @@ void SavedGame::load(const std::string &filename, Mod *mod)
 		_battleGame->load(battle, mod, this);
 	}
 
+    if(Options::hiddenPurchaseItems && doc["hiddenPurchaseItems"])
+    {
+        _hiddenPurchaseItemsMap = doc["hiddenPurchaseItems"].as< std::map<std::string, bool> >(_hiddenPurchaseItemsMap);
+    }
+
 }
 
 /**
@@ -918,6 +923,10 @@ void SavedGame::save(const std::string &filename) const
 			node[key2] = Language::wstrToUtf8(_globalCraftLoadoutName[j]);
 		}
 	}
+    if(Options::hiddenPurchaseItems)
+    {
+        node["hiddenPurchaseItems"] = _hiddenPurchaseItemsMap;
+    }
 	if (Options::soldierDiaries)
 	{
 		for (std::vector<MissionStatistics*>::const_iterator i = _missionStatistics.begin(); i != _missionStatistics.end(); ++i)
@@ -1366,6 +1375,25 @@ void SavedGame::setManufactureRuleStatus(const std::string &manufactureRule, int
 void SavedGame::setResearchRuleStatus(const std::string &researchRule, int newStatus)
 {
 	_researchRuleStatus[researchRule] = newStatus;
+}
+
+/**
+ * Sets the hidden status of a purchase item
+ * @param purchase item name 
+ * @param hidden
+ */
+void SavedGame::setHiddenPurchaseItemsStatus(const std::string &itemName, bool hidden)
+{
+	_hiddenPurchaseItemsMap[itemName] = hidden;
+}
+
+/**
+ * Get the map of hidden items
+ * @return map
+ */
+const std::map<std::string, bool> & SavedGame::getHiddenPurchaseItems()
+{
+    return _hiddenPurchaseItemsMap;
 }
 
 /*
