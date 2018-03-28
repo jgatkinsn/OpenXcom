@@ -20,6 +20,8 @@
 #include <sstream>
 #include "../Engine/Game.h"
 #include "../Mod/Mod.h"
+#include "../Mod/AlienRace.h"
+#include "../Mod/RuleStartingCondition.h"
 #include "../Engine/LocalizedText.h"
 #include "../Interface/TextButton.h"
 #include "../Interface/Window.h"
@@ -50,18 +52,32 @@ namespace OpenXcom
  */
 InterceptState::InterceptState(Globe *globe, Base *base, Target *target) : _globe(globe), _base(base), _target(target)
 {
+	const int WIDTH_RANGE_STATUS = 8;
 	const int WIDTH_CRAFT = 72;
 	const int WIDTH_STATUS = 94;
 	const int WIDTH_BASE = 74;
 	const int WIDTH_WEAPONS = 48;
+	const int RED_TEXT = 129;
+	const int GREEN_TEXT = 107;
+	const int BLUE_TEXT = 80;
+	const int YELLOW_TEXT = 251;
+	const std::wstring UNICODE_CIRCLE = L"\u25CF";
+	const std::wstring UNICODE_SQUARE = L"\u25A0";
+	const std::wstring UNICODE_DIAMOND = L"\u25C6";
+	const std::wstring UNICODE_TRIANGLE = L"\u25B2";
+    int targetColumnOffset = 0;
 	_screen = false;
+    if(_target != 0 && Options::interceptorRangeStatus)
+    {
+        targetColumnOffset = 8;
+    }
 
 	// Create objects
 	_window = new Window(this, 320, 140, 0, 30, POPUP_HORIZONTAL);
 	_btnCancel = new TextButton(_base ? 142 : 288, 16, 16, 146);
 	_btnGotoBase = new TextButton(142, 16, 162, 146);
 	_txtTitle = new Text(300, 17, 10, 46);
-	int x = 14;
+	int x = 14+targetColumnOffset;
 	_txtCraft = new Text(WIDTH_CRAFT, 9, x, 70);
 	x += WIDTH_CRAFT;
 	_txtStatus = new Text(WIDTH_STATUS, 9, x, 70);
@@ -69,7 +85,7 @@ InterceptState::InterceptState(Globe *globe, Base *base, Target *target) : _glob
 	_txtBase = new Text(WIDTH_BASE, 9, x, 70);
 	x += WIDTH_BASE;
 	_txtWeapons = new Text(WIDTH_WEAPONS+4, 17, x-4, 62);
-	_lstCrafts = new TextList(290, 64, 12, 78);
+	_lstCrafts = new TextList(290+targetColumnOffset, 64, 12, 78);
 
 	// Set palette
 	setInterface("intercept");
@@ -111,8 +127,17 @@ InterceptState::InterceptState(Globe *globe, Base *base, Target *target) : _glob
 	_txtWeapons->setAlign(ALIGN_RIGHT);
 	_txtWeapons->setText(tr("STR_WEAPONS_CREW_HWPS"));
 
-	_lstCrafts->setColumns(4, WIDTH_CRAFT, WIDTH_STATUS, WIDTH_BASE, WIDTH_WEAPONS);
-	_lstCrafts->setAlign(ALIGN_RIGHT, 3);
+    if(_target != 0 && Options::interceptorRangeStatus)
+    {
+        _lstCrafts->setColumns(5,WIDTH_RANGE_STATUS, WIDTH_CRAFT, WIDTH_STATUS, WIDTH_BASE, WIDTH_WEAPONS);
+        _lstCrafts->setAlign(ALIGN_RIGHT, 4);
+    }
+    else
+    {
+        _lstCrafts->setColumns(4, WIDTH_CRAFT, WIDTH_STATUS, WIDTH_BASE, WIDTH_WEAPONS);
+        _lstCrafts->setAlign(ALIGN_RIGHT, 3);
+    }
+
 	_lstCrafts->setSelectable(true);
 	_lstCrafts->setBackground(_window);
 	_lstCrafts->setMargin(2);
@@ -244,11 +269,54 @@ InterceptState::InterceptState(Globe *globe, Base *base, Target *target) : _glob
 				ss << 0;
 			}
 			_crafts.push_back(*j);
-			_lstCrafts->addRow(4, (*j)->getName(_game->getLanguage()).c_str(), ssStatus.str().c_str(), (*i)->getName().c_str(), ss.str().c_str());
+
+            std::wstring symbol = UNICODE_CIRCLE;
+            if(_target != 0 && Options::interceptorRangeStatus)
+            {
+                _lstCrafts->addRow(5,symbol.c_str(),(*j)->getName(_game->getLanguage()).c_str(), ssStatus.str().c_str(), (*i)->getName().c_str(), ss.str().c_str());
+            }
+            else
+            {
+                _lstCrafts->addRow(4, (*j)->getName(_game->getLanguage()).c_str(), ssStatus.str().c_str(), (*i)->getName().c_str(), ss.str().c_str());
+            }
+
 			if (hasEnoughPilots && status == "STR_READY")
 			{
-				_lstCrafts->setCellColor(row, 1, _lstCrafts->getSecondaryColor());
+                //handle ranges here
+                if(_target != 0 && Options::interceptorRangeStatus)
+                {
+                    double targetDistance = _target->getDistance(*j) * 60.0 * (180.0 / M_PI);
+                    double maxFlightDistance = (*j)->getMaxFlightRange();
+                    if(targetDistance > maxFlightDistance || !isCraftAllowed(*j))
+                    {
+                        _lstCrafts->setCellText(row,0,UNICODE_SQUARE);
+                        _lstCrafts->setCellColor(row, 0, RED_TEXT);
+                    }
+                    else if (targetDistance <= maxFlightDistance && targetDistance > maxFlightDistance * 0.8)
+                    {
+                        _lstCrafts->setCellText(row,0,UNICODE_TRIANGLE);
+                        _lstCrafts->setCellColor(row, 0, YELLOW_TEXT);
+                    }
+                    else
+                    {
+                        _lstCrafts->setCellColor(row, 0, GREEN_TEXT);
+                    }
+                    _lstCrafts->setCellColor(row, 2, _lstCrafts->getSecondaryColor());
+
+                }
+                else
+                {
+                    _lstCrafts->setCellColor(row, 1, _lstCrafts->getSecondaryColor());
+                }
 			}
+            else
+            {
+                if(_target != 0 && Options::interceptorRangeStatus)
+                {
+                    _lstCrafts->setCellText(row,0,UNICODE_DIAMOND);
+                    _lstCrafts->setCellColor(row, 0, BLUE_TEXT);
+                }
+            }
 			row++;
 		}
 	}
@@ -262,6 +330,62 @@ InterceptState::~InterceptState()
 
 }
 
+/**
+ * Determine if the craft is allowed to go to the
+ * target destination.  Liberally stolen from
+ * ConfirmDestinationState - used to show if
+ * interceptor can go there
+ * @param pointer to craft
+ */
+bool InterceptState::isCraftAllowed(Craft *craft)
+{
+	Ufo* u = dynamic_cast<Ufo*>(_target);
+	MissionSite* m = dynamic_cast<MissionSite*>(_target);
+	AlienBase* b = dynamic_cast<AlienBase*>(_target);
+
+	AlienDeployment *ruleDeploy = 0;
+	if (u != 0)
+	{
+		ruleDeploy = _game->getMod()->getDeployment(u->getRules()->getType());
+	}
+	else if (m != 0)
+	{
+		ruleDeploy = _game->getMod()->getDeployment(m->getDeployment()->getType());
+	}
+	else if (b != 0)
+	{
+		AlienRace *race = _game->getMod()->getAlienRace(b->getAlienRace());
+		ruleDeploy = _game->getMod()->getDeployment(race->getBaseCustomMission());
+		if (!ruleDeploy) ruleDeploy = _game->getMod()->getDeployment(b->getDeployment()->getType());
+	}
+	else
+	{
+		// for example just a waypoint
+		return true;
+	}
+
+	if (ruleDeploy == 0)
+	{
+		// e.g. UFOs without alien deployment :(
+		return true;
+	}
+
+	RuleStartingCondition *rule = _game->getMod()->getStartingCondition(ruleDeploy->getStartingCondition());
+	if (rule == 0)
+	{
+		// rule doesn't exist (mod upgrades?)
+		return true;
+	}
+
+	if (rule->isCraftAllowed(craft->getRules()->getType()))
+	{
+		// craft is allowed
+		return true;
+	}
+    return false;
+
+
+}
 /**
  * Closes the window.
  * @param action Pointer to an action.

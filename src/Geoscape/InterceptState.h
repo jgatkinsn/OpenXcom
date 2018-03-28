@@ -47,6 +47,7 @@ private:
 	Base *_base;
 	Target *_target;
 	std::vector<Craft*> _crafts;
+    bool isCraftAllowed(Craft *craft);
 public:
 	/// Creates the Intercept state.
 	InterceptState(Globe *globe, Base *base = 0, Target *target = 0);

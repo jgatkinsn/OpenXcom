@@ -129,6 +129,10 @@ public:
 	const RuleCraftStats& getCraftStats() const;
 	/// Gets the craft's max amount of fuel.
 	int getFuelMax() const;
+	/// Gets the craft's max flight time
+	double getMaxFlightTime() const;
+	/// Gets the craft's max flight range
+	double getMaxFlightRange() const;
 	/// Gets the craft's amount of fuel.
 	int getFuel() const;
 	/// Sets the craft's amount of fuel.

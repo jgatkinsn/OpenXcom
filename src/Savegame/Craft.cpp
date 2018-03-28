@@ -634,6 +634,35 @@ int Craft::getFuelMax() const
 }
 
 /**
+ * Returns maximum flight time a craft has based on "full" tank
+ * (not accounting for escort speed i.e. max speed)
+ * @return Max time in seconds 
+ */
+double Craft::getMaxFlightTime() const
+{
+    double time;
+    //divide by 12 is to account for time returning to base and on the hour (/(2*6)
+	if (!_rules->getRefuelItem().empty())
+    {
+        time = _stats.fuelMax /12;
+    }
+    else
+    {
+        time =_stats.fuelMax/floor(_stats.speedMax/100.0) /12;
+    }
+    return time;
+}
+
+//how far can I go based on time and max speed
+//this is not exact based on consumption intervals muddy the calc,
+//but this assuming no intervals => ultimate max => upper theoretical bound
+double Craft::getMaxFlightRange() const
+{
+    double range = getMaxFlightTime() * _stats.speedMax;
+    return range;
+}
+
+/**
  * Returns the amount of fuel currently contained
  * in this craft.
  * @return Amount of fuel.
