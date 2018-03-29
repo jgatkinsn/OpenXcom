@@ -686,7 +686,7 @@ void PurchaseState::lstItemsMousePress(Action *action)
 	}
 	else if (action->getDetails()->button.button == SDL_BUTTON_RIGHT && Options::hiddenPurchaseItems)
 	{
-        //check for clicks on the list arrows (onMousePress  gets handled before arrowclick methods)
+        //check for clicks on the list arrows 
 		if (action->getAbsoluteXMouse() >= _lstItems->getArrowsLeftEdge() &&
 			action->getAbsoluteXMouse() <= _lstItems->getArrowsRightEdge())
 		{
