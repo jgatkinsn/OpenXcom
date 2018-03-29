@@ -359,27 +359,48 @@ bool PurchaseState::belongsToCategory(int sel, const std::string &cat) const
  */
 bool PurchaseState::isHidden(int sel) const
 {
+    std::string itemName;
+    bool isCraft = false;
 	switch (_items[sel].type)
 	{
 	case TRANSFER_SOLDIER:
 	case TRANSFER_SCIENTIST:
 	case TRANSFER_ENGINEER:
-	case TRANSFER_CRAFT:
 		return false;
+	case TRANSFER_CRAFT:
+        isCraft = true;
 	case TRANSFER_ITEM:
-        std::map<std::string,bool>::const_iterator iter;
-		RuleItem *rule = (RuleItem*)_items[sel].rule;
-        std::map<std::string, bool> hiddenMap = _game->getSavedGame()->getHiddenPurchaseItems();
-        iter = hiddenMap.find(rule->getName());
-        if(iter != hiddenMap.end())
+        if(isCraft)
         {
-            return iter->second;
+            RuleCraft *rule = (RuleCraft*) _items[sel].rule;
+            if(rule != 0)
+            {
+                itemName = rule->getType();
+            }
         }
         else
         {
-            //not found, so assume it's not hidden
-            _game->getSavedGame()->setHiddenPurchaseItemsStatus(rule->getName(), false);
-            return false;
+            RuleItem *rule = (RuleItem*) _items[sel].rule;
+            if(rule != 0)
+            {
+                itemName = rule->getType();
+            }
+        }
+        if(!itemName.empty())
+        {
+            std::map<std::string, bool>::const_iterator iter;
+            std::map<std::string, bool> hiddenMap = _game->getSavedGame()->getHiddenPurchaseItems();
+            iter = hiddenMap.find(itemName);
+            if(iter != hiddenMap.end())
+            {
+                return iter->second;
+            }
+            else
+            {
+                //not found, so assume it's not hidden
+                _game->getSavedGame()->setHiddenPurchaseItemsStatus(itemName, false);
+                return false;
+            }
         }
 	}
 	return false;
@@ -693,13 +714,29 @@ void PurchaseState::lstItemsMousePress(Action *action)
             return;
 		}
         //only toggle hidden on items
-		if (getRow().type == TRANSFER_ITEM)
+		if (getRow().type == TRANSFER_ITEM || getRow().type == TRANSFER_CRAFT)
         {
-			RuleItem *rule = (RuleItem*)getRow().rule;
-			if (rule != 0)
-			{
+
+            std::string itemName;
+            if(getRow().type == TRANSFER_CRAFT)
+            {
+                RuleCraft *rule = (RuleCraft*) getRow().rule;
+                if(rule != 0)
+                {
+                    itemName = rule->getType();
+                }
+            }
+            else
+            {
+                RuleItem *rule = (RuleItem*) getRow().rule;
+                if(rule != 0)
+                {
+                    itemName = rule->getType();
+                }
+            }
+            if(!itemName.empty())
+            {
                 std::map<std::string,bool>::iterator iter;
-                std::string itemName = rule->getName();
                 std::map<std::string, bool> hiddenMap = _game->getSavedGame()->getHiddenPurchaseItems();
                 iter = hiddenMap.find(itemName);
                 if(iter != hiddenMap.end())
@@ -716,7 +753,7 @@ void PurchaseState::lstItemsMousePress(Action *action)
                     //not found, so assume it's not hidden
                     _game->getSavedGame()->setHiddenPurchaseItemsStatus(itemName, false);
                 }
-			}
+            }
 
         }
     }
