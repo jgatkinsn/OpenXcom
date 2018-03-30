@@ -53,6 +53,7 @@ OPT SDLKey keyGeoUfoTracker, keyGeoTechTreeViewer, keyGeoGlobalResearch,
 // Extra options (Meridian's build)
 OPT bool executeUnconsciousEnemies, twoHandedIndicator, twoHandedIndicatorInventory, minimapBorderIndicator, everyoneFightsNobodyQuits;
 OPT bool bleedingIndicator, knockOutIndicator, statisticalBulletConservation;
+OPT bool interceptorRangeStatus;
 
 OPT bool showItemNameAndWeightInInventory;
 OPT bool showGunMeleeOnTop;
