@@ -2004,31 +2004,149 @@ interfaces: #done
         pos: [90, 55]
         color: 6
         color2: 12
+  - type: articleTFTD
+    palette: PAL_BASESCAPE
+    backgroundImage: BACK08.SCR
+    elements:
+      - id: button
+        color: 2       # light grey
+      - id: text
+        color: 2       # light grey
+        color2: 244    # blue
+      - id: list
+        color: 2       # light grey
+        color2: 244    # blue
+  - type: articleCraftTFTD
+    palette: PAL_BASESCAPE
+    backgroundImage: BACK08.SCR
+    elements:
+      - id: button
+        color: 2       # light grey
+      - id: text
+        color: 2       # light grey
+        color2: 244    # blue
+      - id: list
+        color: 2       # light grey
+        color2: 244    # blue
+  - type: articleCraftWeaponTFTD
+    palette: PAL_BASESCAPE
+    backgroundImage: BACK08.SCR
+    elements:
+      - id: button
+        color: 2       # light grey
+      - id: text
+        color: 2       # light grey
+        color2: 244    # blue
+      - id: list
+        color: 2       # light grey
+        color2: 244    # blue
+  - type: articleVehicleTFTD
+    palette: PAL_BASESCAPE
+    backgroundImage: BACK08.SCR
+    elements:
+      - id: button
+        color: 2       # light grey
+      - id: text
+        color: 2       # light grey
+        color2: 244    # blue
+      - id: list
+        color: 2       # light grey
+        color2: 244    # blue
+  - type: articleItemTFTD
+    palette: PAL_BASESCAPE
+    backgroundImage: BACK08.SCR
+    elements:
+      - id: button
+        color: 2       # light grey
+      - id: text
+        color: 2       # light grey
+        color2: 244    # blue
+      - id: list
+        color: 2       # light grey
+        color2: 244    # blue
+      - id: ammoColor
+        color: 54      # green
+  - type: articleArmorTFTD
+    palette: PAL_BASESCAPE
+    backgroundImage: BACK08.SCR
+    elements:
+      - id: button
+        color: 2       # light grey
+      - id: text
+        color: 2       # light grey
+        color2: 244    # blue
+      - id: list
+        color: 2       # light grey
+        color2: 244    # blue
+  - type: articleBaseFacilityTFTD
+    palette: PAL_BASESCAPE
+    backgroundImage: BACK08.SCR
+    elements:
+      - id: button
+        color: 2       # light grey
+      - id: text
+        color: 2       # light grey
+        color2: 244    # blue
+      - id: list
+        color: 2       # light grey
+        color2: 244    # blue
+  - type: articleUsoTFTD
+    palette: PAL_BASESCAPE
+    backgroundImage: BACK08.SCR
+    elements:
+      - id: button
+        color: 2       # light grey
+      - id: text
+        color: 2       # light grey
+        color2: 244    # blue
+      - id: list
+        color: 2       # light grey
+        color2: 244    # blue
+  - type: statsForNerds
+    elements:
+      - id: palette
+        color: 0
+      - id: window
+        color: 1
+      - id: text
+        color: 1
+        color2: 244
+      - id: list
+        color: 1     # xcom1 purple (property name, property default value)
+        color2: 239  # xcom1 pink (property value)
+        border: 1    # xcom1 blue (header)
+      - id: listExtended
+        color: 244   # xcom1 white (section label)
+        color2: 244  # xcom1 gold (resource paths)
+      - id: button
+        color: 1
+      - id: comboBox
+        color: 239
   - type: interceptorRangeStatusReady
     elements:
       - id: craftNotAllowed
         textShape:  0x2716   # unicode character for X cross (must be hex)
-        color:  129      # red 
+        color:  126      # pink 
       - id: inRange
         textShape:  0x25CF   # unicode character for circle (must be hex)
-        color:  107      # some shade of brightish green
+        color:  119      # some shade of brightish green
       - id: mightBeInRange
         textShape:  0x25B2   # unicode character for triangle (must be hex)
-        color:  251      # golden yellow
+        color:  145      # golden yellow
       - id: outOfRange
         textShape:  0x25A0   # unicode character for square (must be hex)
-        color:  129      # red 
+        color:  8      # red 
   - type: interceptorRangeStatusNotReady
     elements:
       - id: craftNotAllowed
         textShape:  0x2716   # unicode character for X cross (must be hex)
-        color:  80       # dull blue 
+        color:  111       # orange navy
       - id: inRange
         textShape:  0x25CF   # unicode character for circle (must be hex)
-        color:  80       # dull blue 
+        color:  111       # orange navy
       - id: mightBeInRange
         textShape:  0x25B2   # unicode character for triangle (must be hex)
-        color:  80       # dull blue 
+        color:  111       # orange navy
       - id: outOfRange
         textShape:  0x25A0   # unicode character for square (must be hex)
-        color:  80       # dull blue 
+        color:  111       # orange navy
