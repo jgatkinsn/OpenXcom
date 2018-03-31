@@ -1850,6 +1850,34 @@ interfaces:
       - id: list
         color: 239   # grey
         color2: 244  # light blue
+  - type: interceptorRangeStatusReady
+    elements:
+      - id: craftNotAllowed
+        textShape:  0x2716   # unicode character for X cross (must be hex)
+        color:  129      # red 
+      - id: inRange
+        textShape:  0x25CF   # unicode character for circle (must be hex)
+        color:  107      # some shade of brightish green
+      - id: mightBeInRange
+        textShape:  0x25B2   # unicode character for triangle (must be hex)
+        color:  251      # golden yellow
+      - id: outOfRange
+        textShape:  0x25A0   # unicode character for square (must be hex)
+        color:  129      # red 
+  - type: interceptorRangeStatusNotReady
+    elements:
+      - id: craftNotAllowed
+        textShape:  0x2716   # unicode character for X cross (must be hex)
+        color:  80       # dull blue 
+      - id: inRange
+        textShape:  0x25CF   # unicode character for circle (must be hex)
+        color:  80       # dull blue 
+      - id: mightBeInRange
+        textShape:  0x25B2   # unicode character for triangle (must be hex)
+        color:  80       # dull blue 
+      - id: outOfRange
+        textShape:  0x25A0   # unicode character for square (must be hex)
+        color:  80       # dull blue 
   - type: articleItem
     elements:
       - id: button

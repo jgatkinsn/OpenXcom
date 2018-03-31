@@ -22,6 +22,7 @@
 #include "../Mod/Mod.h"
 #include "../Mod/AlienRace.h"
 #include "../Mod/RuleStartingCondition.h"
+#include "../Mod/RuleInterface.h"
 #include "../Engine/LocalizedText.h"
 #include "../Interface/TextButton.h"
 #include "../Interface/Window.h"
@@ -52,24 +53,16 @@ namespace OpenXcom
  */
 InterceptState::InterceptState(Globe *globe, Base *base, Target *target) : _globe(globe), _base(base), _target(target)
 {
-	const int WIDTH_RANGE_STATUS = 8;
+	const int WIDTH_RANGE_STATUS = 9;
 	const int WIDTH_CRAFT = 72;
 	const int WIDTH_STATUS = 94;
 	const int WIDTH_BASE = 74;
 	const int WIDTH_WEAPONS = 48;
-	const int RED_TEXT = 129;
-	const int GREEN_TEXT = 107;
-	const int BLUE_TEXT = 80;
-	const int YELLOW_TEXT = 251;
-	const std::wstring UNICODE_CIRCLE = L"\u25CF";
-	const std::wstring UNICODE_SQUARE = L"\u25A0";
-	const std::wstring UNICODE_DIAMOND = L"\u25C6";
-	const std::wstring UNICODE_TRIANGLE = L"\u25B2";
-    int targetColumnOffset = 0;
+    int rangeColumnOffset = 0;
 	_screen = false;
     if(_target != 0 && Options::interceptorRangeStatus)
     {
-        targetColumnOffset = 8;
+        rangeColumnOffset = WIDTH_RANGE_STATUS;
     }
 
 	// Create objects
@@ -77,7 +70,7 @@ InterceptState::InterceptState(Globe *globe, Base *base, Target *target) : _glob
 	_btnCancel = new TextButton(_base ? 142 : 288, 16, 16, 146);
 	_btnGotoBase = new TextButton(142, 16, 162, 146);
 	_txtTitle = new Text(300, 17, 10, 46);
-	int x = 14+targetColumnOffset;
+	int x = 14+rangeColumnOffset;
 	_txtCraft = new Text(WIDTH_CRAFT, 9, x, 70);
 	x += WIDTH_CRAFT;
 	_txtStatus = new Text(WIDTH_STATUS, 9, x, 70);
@@ -85,7 +78,7 @@ InterceptState::InterceptState(Globe *globe, Base *base, Target *target) : _glob
 	_txtBase = new Text(WIDTH_BASE, 9, x, 70);
 	x += WIDTH_BASE;
 	_txtWeapons = new Text(WIDTH_WEAPONS+4, 17, x-4, 62);
-	_lstCrafts = new TextList(290+targetColumnOffset, 64, 12, 78);
+	_lstCrafts = new TextList(290+rangeColumnOffset, 64, 12, 78);
 
 	// Set palette
 	setInterface("intercept");
@@ -270,10 +263,9 @@ InterceptState::InterceptState(Globe *globe, Base *base, Target *target) : _glob
 			}
 			_crafts.push_back(*j);
 
-            std::wstring symbol = UNICODE_CIRCLE;
             if(_target != 0 && Options::interceptorRangeStatus)
             {
-                _lstCrafts->addRow(5,symbol.c_str(),(*j)->getName(_game->getLanguage()).c_str(), ssStatus.str().c_str(), (*i)->getName().c_str(), ss.str().c_str());
+                _lstCrafts->addRow(5," ",(*j)->getName(_game->getLanguage()).c_str(), ssStatus.str().c_str(), (*i)->getName().c_str(), ss.str().c_str());
             }
             else
             {
@@ -285,22 +277,7 @@ InterceptState::InterceptState(Globe *globe, Base *base, Target *target) : _glob
                 //handle ranges here
                 if(_target != 0 && Options::interceptorRangeStatus)
                 {
-                    double targetDistance = _target->getDistance(*j) * 60.0 * (180.0 / M_PI);
-                    double maxFlightDistance = (*j)->getMaxFlightRange();
-                    if(targetDistance > maxFlightDistance || !isCraftAllowed(*j))
-                    {
-                        _lstCrafts->setCellText(row,0,UNICODE_SQUARE);
-                        _lstCrafts->setCellColor(row, 0, RED_TEXT);
-                    }
-                    else if (targetDistance <= maxFlightDistance && targetDistance > maxFlightDistance * 0.8)
-                    {
-                        _lstCrafts->setCellText(row,0,UNICODE_TRIANGLE);
-                        _lstCrafts->setCellColor(row, 0, YELLOW_TEXT);
-                    }
-                    else
-                    {
-                        _lstCrafts->setCellColor(row, 0, GREEN_TEXT);
-                    }
+                    setInterceptorRangeStatus(row, true, (*j));
                     _lstCrafts->setCellColor(row, 2, _lstCrafts->getSecondaryColor());
 
                 }
@@ -313,8 +290,7 @@ InterceptState::InterceptState(Globe *globe, Base *base, Target *target) : _glob
             {
                 if(_target != 0 && Options::interceptorRangeStatus)
                 {
-                    _lstCrafts->setCellText(row,0,UNICODE_DIAMOND);
-                    _lstCrafts->setCellColor(row, 0, BLUE_TEXT);
+                    setInterceptorRangeStatus(row, false, (*j));
                 }
             }
 			row++;
@@ -383,9 +359,68 @@ bool InterceptState::isCraftAllowed(Craft *craft)
 		return true;
 	}
     return false;
+}
 
+/**
+ * Sets the intercetpor range status (color and shape) 
+ * based on the status of craft and range to target
+ * @param row of the list 
+ * @param ready - is craft ready? 
+ * @param Craft pointer 
+ */
+void InterceptState::setInterceptorRangeStatus(int row, bool ready, Craft *craft)
+{
+    if(_game->getMod()->getInterface("interceptorRangeStatusReady") == 0 ||
+       _game->getMod()->getInterface("interceptorRangeStatusNotReady") == 0 )
+    {
+        return;
+    }
+
+    double targetDistance = _target->getDistance(craft) * 60.0 * (180.0 / M_PI);
+    double maxFlightDistance = craft->getMaxFlightRange();
+
+	RuleInterface *ruleInterface;
+    if(ready)
+    {
+        ruleInterface = _game->getMod()->getInterface("interceptorRangeStatusReady");
+    }
+    else
+    {
+        ruleInterface = _game->getMod()->getInterface("interceptorRangeStatusNotReady");
+    }
+
+    if(ruleInterface)
+    {
+        Element *element;
+        if(!isCraftAllowed(craft))
+        {
+            element = ruleInterface->getElement("craftNotAllowed");
+        }
+        else if(targetDistance > maxFlightDistance)
+        {
+            element = ruleInterface->getElement("outOfRange");
+        }
+        else if (targetDistance <= maxFlightDistance && targetDistance > maxFlightDistance * 0.9)
+        {
+            element = ruleInterface->getElement("mightBeInRange");
+        }
+        else
+        {
+            element = ruleInterface->getElement("inRange");
+        }
+
+        if(element)
+        {
+            wchar_t shape = wchar_t(element->textShape);
+            std::wstring sShape(&shape);
+            sShape[1] = L'\0';  //add null to remove wierd artifact
+            _lstCrafts->setCellText(row,0, sShape.c_str());
+            _lstCrafts->setCellColor(row, 0, element->color);
+        }
+    }
 
 }
+
 /**
  * Closes the window.
  * @param action Pointer to an action.

@@ -30,6 +30,8 @@ struct Element
 {
 	/// basic rect info, and 3 colors.
 	int x, y, w, h, color, color2, border;
+    /// special integer for unicode shape
+    int textShape;
 	/// defines inversion behaviour
 	bool TFTDMode;
 };

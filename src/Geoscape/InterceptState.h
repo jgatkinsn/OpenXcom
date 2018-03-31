@@ -47,7 +47,10 @@ private:
 	Base *_base;
 	Target *_target;
 	std::vector<Craft*> _crafts;
+    //check if craft is allowed to accomplish mission
     bool isCraftAllowed(Craft *craft);
+    //set the interceptor range status fields
+    void setInterceptorRangeStatus(int row, bool ready, Craft *craft);
 public:
 	/// Creates the Intercept state.
 	InterceptState(Globe *globe, Base *base = 0, Target *target = 0);
@@ -63,6 +66,7 @@ public:
 	void lstCraftsRightClick(Action *action);
 	/// Handler for middle clicking the Crafts list.
 	void lstCraftsMiddleClick(Action *action);
+
 };
 
 }
