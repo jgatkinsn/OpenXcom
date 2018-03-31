@@ -53,7 +53,7 @@ namespace OpenXcom
  */
 InterceptState::InterceptState(Globe *globe, Base *base, Target *target) : _globe(globe), _base(base), _target(target)
 {
-	const int WIDTH_RANGE_STATUS = 8;
+	const int WIDTH_RANGE_STATUS = 9;
 	const int WIDTH_CRAFT = 72;
 	const int WIDTH_STATUS = 94;
 	const int WIDTH_BASE = 74;
@@ -62,7 +62,7 @@ InterceptState::InterceptState(Globe *globe, Base *base, Target *target) : _glob
 	_screen = false;
     if(_target != 0 && Options::interceptorRangeStatus)
     {
-        targetColumnOffset = 8;
+        targetColumnOffset = WIDTH_RANGE_STATUS;
     }
 
 	// Create objects
@@ -413,7 +413,8 @@ void InterceptState::setInterceptorRangeStatus(int row, bool ready, Craft *craft
         {
             wchar_t shape = wchar_t(element->textShape);
             std::wstring sShape(&shape);
-            _lstCrafts->setCellText(row,0, std::wstring(sShape.c_str()));
+            sShape += L"\0";
+            _lstCrafts->setCellText(row,0, sShape.c_str());
             _lstCrafts->setCellColor(row, 0, element->color);
         }
     }
