@@ -58,11 +58,11 @@ InterceptState::InterceptState(Globe *globe, Base *base, Target *target) : _glob
 	const int WIDTH_STATUS = 94;
 	const int WIDTH_BASE = 74;
 	const int WIDTH_WEAPONS = 48;
-    int targetColumnOffset = 0;
+    int rangeColumnOffset = 0;
 	_screen = false;
     if(_target != 0 && Options::interceptorRangeStatus)
     {
-        targetColumnOffset = WIDTH_RANGE_STATUS;
+        rangeColumnOffset = WIDTH_RANGE_STATUS;
     }
 
 	// Create objects
@@ -70,7 +70,7 @@ InterceptState::InterceptState(Globe *globe, Base *base, Target *target) : _glob
 	_btnCancel = new TextButton(_base ? 142 : 288, 16, 16, 146);
 	_btnGotoBase = new TextButton(142, 16, 162, 146);
 	_txtTitle = new Text(300, 17, 10, 46);
-	int x = 14+targetColumnOffset;
+	int x = 14+rangeColumnOffset;
 	_txtCraft = new Text(WIDTH_CRAFT, 9, x, 70);
 	x += WIDTH_CRAFT;
 	_txtStatus = new Text(WIDTH_STATUS, 9, x, 70);
@@ -78,7 +78,7 @@ InterceptState::InterceptState(Globe *globe, Base *base, Target *target) : _glob
 	_txtBase = new Text(WIDTH_BASE, 9, x, 70);
 	x += WIDTH_BASE;
 	_txtWeapons = new Text(WIDTH_WEAPONS+4, 17, x-4, 62);
-	_lstCrafts = new TextList(290+targetColumnOffset, 64, 12, 78);
+	_lstCrafts = new TextList(290+rangeColumnOffset, 64, 12, 78);
 
 	// Set palette
 	setInterface("intercept");
@@ -413,7 +413,7 @@ void InterceptState::setInterceptorRangeStatus(int row, bool ready, Craft *craft
         {
             wchar_t shape = wchar_t(element->textShape);
             std::wstring sShape(&shape);
-            sShape += L"\0";
+            sShape[1] = L'\0';  //add null to remove wierd artifact
             _lstCrafts->setCellText(row,0, sShape.c_str());
             _lstCrafts->setCellColor(row, 0, element->color);
         }
