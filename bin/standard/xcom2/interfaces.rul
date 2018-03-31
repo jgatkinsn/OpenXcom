@@ -2004,6 +2004,124 @@ interfaces: #done
         pos: [90, 55]
         color: 6
         color2: 12
+  - type: articleTFTD
+    palette: PAL_BASESCAPE
+    backgroundImage: BACK08.SCR
+    elements:
+      - id: button
+        color: 2       # light grey
+      - id: text
+        color: 2       # light grey
+        color2: 244    # blue
+      - id: list
+        color: 2       # light grey
+        color2: 244    # blue
+  - type: articleCraftTFTD
+    palette: PAL_BASESCAPE
+    backgroundImage: BACK08.SCR
+    elements:
+      - id: button
+        color: 2       # light grey
+      - id: text
+        color: 2       # light grey
+        color2: 244    # blue
+      - id: list
+        color: 2       # light grey
+        color2: 244    # blue
+  - type: articleCraftWeaponTFTD
+    palette: PAL_BASESCAPE
+    backgroundImage: BACK08.SCR
+    elements:
+      - id: button
+        color: 2       # light grey
+      - id: text
+        color: 2       # light grey
+        color2: 244    # blue
+      - id: list
+        color: 2       # light grey
+        color2: 244    # blue
+  - type: articleVehicleTFTD
+    palette: PAL_BASESCAPE
+    backgroundImage: BACK08.SCR
+    elements:
+      - id: button
+        color: 2       # light grey
+      - id: text
+        color: 2       # light grey
+        color2: 244    # blue
+      - id: list
+        color: 2       # light grey
+        color2: 244    # blue
+  - type: articleItemTFTD
+    palette: PAL_BASESCAPE
+    backgroundImage: BACK08.SCR
+    elements:
+      - id: button
+        color: 2       # light grey
+      - id: text
+        color: 2       # light grey
+        color2: 244    # blue
+      - id: list
+        color: 2       # light grey
+        color2: 244    # blue
+      - id: ammoColor
+        color: 54      # green
+  - type: articleArmorTFTD
+    palette: PAL_BASESCAPE
+    backgroundImage: BACK08.SCR
+    elements:
+      - id: button
+        color: 2       # light grey
+      - id: text
+        color: 2       # light grey
+        color2: 244    # blue
+      - id: list
+        color: 2       # light grey
+        color2: 244    # blue
+  - type: articleBaseFacilityTFTD
+    palette: PAL_BASESCAPE
+    backgroundImage: BACK08.SCR
+    elements:
+      - id: button
+        color: 2       # light grey
+      - id: text
+        color: 2       # light grey
+        color2: 244    # blue
+      - id: list
+        color: 2       # light grey
+        color2: 244    # blue
+  - type: articleUsoTFTD
+    palette: PAL_BASESCAPE
+    backgroundImage: BACK08.SCR
+    elements:
+      - id: button
+        color: 2       # light grey
+      - id: text
+        color: 2       # light grey
+        color2: 244    # blue
+      - id: list
+        color: 2       # light grey
+        color2: 244    # blue
+  - type: statsForNerds
+    elements:
+      - id: palette
+        color: 0
+      - id: window
+        color: 1
+      - id: text
+        color: 1
+        color2: 244
+      - id: list
+        color: 1     # xcom1 purple (property name, property default value)
+        color2: 239  # xcom1 pink (property value)
+        border: 1    # xcom1 blue (header)
+      - id: listExtended
+        color: 244   # xcom1 white (section label)
+        color2: 244  # xcom1 gold (resource paths)
+      - id: button
+        color: 1
+      - id: comboBox
+        color: 239
   - type: interceptorRangeStatusReady
     elements:
       - id: craftNotAllowed
