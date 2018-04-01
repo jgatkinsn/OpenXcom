@@ -207,7 +207,7 @@ en-GB:
   STR_FRIENDLY_CRAFT_ESCORT: "Friendly craft escort"
   STR_FRIENDLY_CRAFT_ESCORT_DESC: "Allows your craft to follow and provide air defence for other craft in the Geoscape."
   STR_INTERCEPTOR_RANGE_STATUS: "Interceptor Range Status"
-  STR_INTERCEPTOR_RANGE_STATUS_DESC: "On Interceptor Screen, show range status to target from base: Red - out of range, Yellow - probable, Green - good, Blue - n/a for default settings"
+  STR_INTERCEPTOR_RANGE_STATUS_DESC: "On Interceptor Screen, show range status to target from base via color and shape indicators"
   STR_GRAPHS_ZOOM_IN: "Zoom In (Graphs)"
   STR_GRAPHS_ZOOM_OUT: "Zoom Out (Graphs)"
   STR_MARK_ALL_AS_SEEN: "Mark All As Seen"

@@ -1853,8 +1853,8 @@ interfaces:
   - type: interceptorRangeStatusReady
     elements:
       - id: craftNotAllowed
-        textShape:  0x2716   # unicode character for X cross (must be hex)
-        color:  129      # red 
+        textShape:  0x0058   # unicode character for X cross (must be hex)
+        color:  128      # red 
       - id: inRange
         textShape:  0x25CF   # unicode character for circle (must be hex)
         color:  107      # some shade of brightish green
@@ -1863,11 +1863,11 @@ interfaces:
         color:  251      # golden yellow
       - id: outOfRange
         textShape:  0x25A0   # unicode character for square (must be hex)
-        color:  129      # red 
+        color:  128      # red 
   - type: interceptorRangeStatusNotReady
     elements:
       - id: craftNotAllowed
-        textShape:  0x2716   # unicode character for X cross (must be hex)
+        textShape:  0x0058   # unicode character for X cross (must be hex)
         color:  80       # dull blue 
       - id: inRange
         textShape:  0x25CF   # unicode character for circle (must be hex)
