@@ -72,6 +72,15 @@ Craft::Craft(RuleCraft *rules, Base *base, int id) : MovingTarget(),
 	{
 		setBase(base);
 	}
+	recalcSpeedMaxRadian();
+}
+
+/**
+ * Helper method.
+ */
+void Craft::recalcSpeedMaxRadian()
+{
+	_speedMaxRadian = calculateRadianSpeed(_stats.speedMax) * 120;
 }
 
 /**
@@ -224,6 +233,8 @@ void Craft::load(const YAML::Node &node, const Mod *mod, SavedGame *save)
 	_pilots = node["pilots"].as< std::vector<int> >(_pilots);
 	if (_inBattlescape)
 		setSpeed(0);
+
+	recalcSpeedMaxRadian();
 }
 
 /**
@@ -613,6 +624,8 @@ void Craft::addCraftStats(const RuleCraftStats& s)
 		_base->getStorageItems()->addItem(_rules->getRefuelItem(), overflowFuel / _rules->getRefuelRate());
 	}
 	setFuel(_fuel);
+
+	recalcSpeedMaxRadian();
 }
 
 /**
@@ -801,19 +814,20 @@ double Craft::getDistanceFromBase() const
 
 /**
  * Returns the amount of fuel the craft uses up
- * while it's on the air, based on its speed.
+ * while it's on the air.
+ * @param speed Craft speed for estimation.
  * @return Fuel amount.
  */
-int Craft::getFuelConsumption(int escortSpeed) const
+int Craft::getFuelConsumption(int speed, int escortSpeed) const
 {
 	if (!_rules->getRefuelItem().empty())
 		return 1;
 	if (escortSpeed > 0)
 	{
 		// based on the speed of the escorted craft, but capped between 50% and 100% of escorting craft's speed
-		return std::max(_rules->getMaxSpeed() / 200, std::min(escortSpeed / 100, _rules->getMaxSpeed() / 100));
+		return std::max(_stats.speedMax / 200, std::min(escortSpeed / 100, _stats.speedMax / 100));
 	}
-	return (int)floor(_speed / 100.0);
+	return (int)floor(speed / 100.0);
 }
 
 /**
@@ -834,7 +848,7 @@ int Craft::getFuelLimit() const
  */
 int Craft::getFuelLimit(Base *base) const
 {
-	return (int)floor(getFuelConsumption(0) * getDistance(base) / (_speedRadian * 120));
+	return (int)floor(getFuelConsumption(_stats.speedMax, 0) * getDistance(base) / _speedMaxRadian);
 }
 
 /**
@@ -954,11 +968,11 @@ void Craft::checkup()
  */
 bool Craft::detect(Target *target) const
 {
-	if (_rules->getRadarRange() == 0 || !insideRadarRange(target))
+	if (_stats.radarRange == 0 || !insideRadarRange(target))
 		return false;
 
 	// backward compatibility with vanilla
-	if (_rules->getRadarChance() == 100)
+	if (_stats.radarChance == 100)
 		return true;
 
 	Ufo *u = dynamic_cast<Ufo*>(target);
@@ -984,7 +998,7 @@ bool Craft::insideRadarRange(Target *target) const
  */
 void Craft::consumeFuel(int escortSpeed)
 {
-	setFuel(_fuel - getFuelConsumption(escortSpeed));
+	setFuel(_fuel - getFuelConsumption(_speed, escortSpeed));
 }
 
 /**
@@ -1010,7 +1024,7 @@ unsigned int Craft::calcRefuelTime()
 {
 	unsigned int refuelTime = 0;
 
-	int needed = _rules->getMaxFuel() - _fuel;
+	int needed = _stats.fuelMax - _fuel;
 	if (needed > 0)
 	{
 		refuelTime = (int)ceil((double)(needed) / _rules->getRefuelRate() / 2.0);
@@ -1522,7 +1536,7 @@ void Craft::reuseItem(const std::string& item)
 		return;
 
 	// Check if it's fuel to refuel the craft
-	if (item == _rules->getRefuelItem() && _fuel < _rules->getMaxFuel())
+	if (item == _rules->getRefuelItem() && _fuel < _stats.fuelMax)
 		_status = "STR_REFUELLING";
 }
 
@@ -1548,7 +1562,7 @@ int Craft::getHunterKillerAttraction(int huntMode) const
 			attraction += 500000 + (_rules->getSoldiers() * 1000);
 		}
 		// faster craft (i.e. interceptors) are more attractive
-		attraction += 100000 - _rules->getMaxSpeed();
+		attraction += 100000 - _stats.speedMax;
 		// craft with more damage taken are less attractive
 		// this is just to simplify re-targeting when interceptor is fast enough to disengage
 		// and another identical but healthier interceptor is waiting for its chance
@@ -1565,7 +1579,7 @@ int Craft::getHunterKillerAttraction(int huntMode) const
 		// craft with more crew capacity (i.e. transports) are more attractive
 		attraction += 500000 - (_rules->getSoldiers() * 1000);
 		// faster craft (i.e. interceptors) are less attractive
-		attraction += 100000 + _rules->getMaxSpeed();
+		attraction += 100000 + _stats.speedMax;
 	}
 
 	// the higher the number the less attractive the target is for UFO hunter-killers

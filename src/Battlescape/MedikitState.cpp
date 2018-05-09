@@ -167,7 +167,17 @@ MedikitState::MedikitState (BattleUnit *targetUnit, BattleAction *action, TileEn
 
 	centerAllSurfaces();
 
-	_game->getMod()->getSurface("MEDIBORD.PCK")->blit(_bg);
+	Surface *backgroundSprite = 0;
+	if (!_item->getRules()->getMediKitCustomBackground().empty())
+	{
+		backgroundSprite = _game->getMod()->getSurface(_item->getRules()->getMediKitCustomBackground(), false);
+	}
+	if (!backgroundSprite)
+	{
+		backgroundSprite = _game->getMod()->getSurface("MEDIBORD.PCK");
+	}
+
+	backgroundSprite->blit(_bg);
 	_pkText->setBig();
 	_stimulantTxt->setBig();
 	_healTxt->setBig();
@@ -232,7 +242,18 @@ void MedikitState::onHealClick(Action *)
 		{
 			if (!_revivedTarget)
 			{
-				_action->actor->getStatistics()->revivedSoldier++;
+				if (_targetUnit->getOriginalFaction() == FACTION_PLAYER)
+				{
+					_action->actor->getStatistics()->revivedSoldier++;
+				}
+				else if (_targetUnit->getOriginalFaction() == FACTION_HOSTILE)
+				{
+					_action->actor->getStatistics()->revivedHostile++;
+				}
+				else
+				{
+					_action->actor->getStatistics()->revivedNeutral++;
+				}
 				_revivedTarget = true;
 			}
 			// if the unit has revived and has no more wounds, we quit this screen automatically
@@ -268,7 +289,18 @@ void MedikitState::onStimulantClick(Action *)
 		// if the unit has revived we quit this screen automatically
 		if (_targetUnit->getStatus() == STATUS_UNCONSCIOUS && _targetUnit->getStunlevel() < _targetUnit->getHealth() && _targetUnit->getHealth() > 0)
 		{
-			_action->actor->getStatistics()->revivedSoldier++;
+			if (_targetUnit->getOriginalFaction() == FACTION_PLAYER)
+			{
+				_action->actor->getStatistics()->revivedSoldier++;
+			}
+			else if (_targetUnit->getOriginalFaction() == FACTION_HOSTILE)
+			{
+				_action->actor->getStatistics()->revivedHostile++;
+			}
+			else
+			{
+				_action->actor->getStatistics()->revivedNeutral++;
+			}
 			onEndClick(0);
 		}
 	}

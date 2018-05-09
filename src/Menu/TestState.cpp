@@ -30,6 +30,8 @@
 #include "../Engine/Exception.h"
 #include "../Engine/FileMap.h"
 #include "../Engine/Logger.h"
+#include "../Engine/Palette.h"
+#include "../Mod/ExtraSprites.h"
 #include "../Mod/RuleTerrain.h"
 #include "../Mod/MapBlock.h"
 #include "../Mod/MapDataSet.h"
@@ -39,6 +41,35 @@
 namespace OpenXcom
 {
 
+// items are (roughly) ordered by frequency of use... to save a few CPU cycles when looking for a match
+static std::map<int, PaletteTestMetadata> _paletteMetadataMap =
+{
+	{ 1, PaletteTestMetadata("UFO_PAL_BATTLEPEDIA", 1, 255, 0, "Palettes/UFO-JASC/PAL_BATTLEPEDIA.pal", false) },
+	{ 2, PaletteTestMetadata("UFO_PAL_BATTLESCAPE", 1, 255, 0, "Palettes/UFO-JASC/PAL_BATTLESCAPE.pal", false) },
+
+	{ 3, PaletteTestMetadata("UFO_PAL_BATTLE_COMMON", 1, 239, 0, "Palettes/UFO-JASC/PAL_BATTLE_COMMON.pal", false) }, // ignore last 16 colors
+
+	{ 4, PaletteTestMetadata("TFTD_PAL_BATTLESCAPE", 1, 254, 3, "Palettes/TFTD-JASC/PAL_BATTLESCAPE.pal", false) }, // ignore last color too
+
+	{ 5, PaletteTestMetadata("UFO_PAL_UFOPAEDIA", 1, 255, 0, "Palettes/UFO-JASC/PAL_UFOPAEDIA.pal", false) },
+	{ 6, PaletteTestMetadata("TFTD_PAL_BASESCAPE", 1, 255, 0, "Palettes/TFTD-JASC/PAL_BASESCAPE.pal", true) }, // TFTD's ufopedia
+
+	{ 7, PaletteTestMetadata("UFO_PAL_BASESCAPE", 1, 255, 0, "Palettes/UFO-JASC/PAL_BASESCAPE.pal", true) },
+
+	{ 8, PaletteTestMetadata("UFO_PAL_GEOSCAPE", 1, 255, 0, "Palettes/UFO-JASC/PAL_GEOSCAPE.pal", true) },
+	{ 9, PaletteTestMetadata("TFTD_PAL_GEOSCAPE", 1, 255, 0, "Palettes/TFTD-JASC/PAL_GEOSCAPE.pal", true) },
+
+	{ 10, PaletteTestMetadata("TFTD_PAL_BATTLESCAPE_1", 1, 254, 3, "Palettes/TFTD-JASC/PAL_BATTLESCAPE_1.pal", false) },
+	{ 11, PaletteTestMetadata("TFTD_PAL_BATTLESCAPE_2", 1, 254, 3, "Palettes/TFTD-JASC/PAL_BATTLESCAPE_2.pal", false) },
+	{ 12, PaletteTestMetadata("TFTD_PAL_BATTLESCAPE_3", 1, 254, 3, "Palettes/TFTD-JASC/PAL_BATTLESCAPE_3.pal", false) },
+
+	{ 13, PaletteTestMetadata("UFO_PAL_BACKGROUND_SAFE", 0, 255, 0, "Palettes/UFO-JASC-SAFE/PAL_BACKGROUND_SAFE.pal", false) },
+	{ 14, PaletteTestMetadata("TFTD_PAL_BACKGROUND_SAFE", 0, 255, 0, "Palettes/TFTD-JASC-SAFE/PAL_BACKGROUND_SAFE.pal", false) },
+
+	{ 15, PaletteTestMetadata("UFO_PAL_GRAPHS", 1, 255, 0, "Palettes/UFO-JASC/PAL_GRAPHS.pal", false) },
+	{ 16, PaletteTestMetadata("TFTD_PAL_GRAPHS", 1, 255, 0, "Palettes/TFTD-JASC/PAL_GRAPHS.pal", false) }
+};
+
 /**
  * Initializes all the elements in the test screen.
  */
@@ -47,13 +78,11 @@ TestState::TestState()
 	// Create objects
 	_window = new Window(this, 320, 200, 0, 0);
 	_txtTitle = new Text(300, 17, 10, 7);
-	_txtPalette = new Text(86, 9, 10, 30);
-	_cbxPalette = new ComboBox(this, 114, 16, 98, 26);
-	_btnLowContrast = new TextButton(42, 16, 220, 26);
-	_btnHighContrast = new TextButton(42, 16, 270, 26);
-	_btnPreview = new TextButton(92, 16, 220, 26);
-	_txtTestCase = new Text(86, 9, 10, 50);
-	_cbxTestCase = new ComboBox(this, 214, 16, 98, 46);
+	_txtPalette = new Text(66, 9, 10, 30);
+	_cbxPalette = new ComboBox(this, 114, 16, 78, 26);
+	_cbxPaletteAction = new ComboBox(this, 114, 16, 198, 26);
+	_txtTestCase = new Text(66, 9, 10, 50);
+	_cbxTestCase = new ComboBox(this, 234, 16, 78, 46);
 	_txtDescription = new Text(300, 25, 10, 66);
 	_lstOutput = new TextList(284, 80, 10, 94);
 	_btnRun = new TextButton(146, 16, 10, 176);
@@ -65,9 +94,6 @@ TestState::TestState()
 	add(_window, "window", "tests");
 	add(_txtTitle, "heading", "tests");
 	add(_txtPalette, "text", "tests");
-	add(_btnLowContrast, "button2", "tests");
-	add(_btnHighContrast, "button2", "tests");
-	add(_btnPreview, "button2", "tests");
 	add(_txtTestCase, "text", "tests");
 	add(_txtDescription, "heading", "tests");
 	add(_lstOutput, "text", "tests");
@@ -75,6 +101,7 @@ TestState::TestState()
 	add(_btnCancel, "button2", "tests");
 	add(_cbxTestCase, "button1", "tests"); // add as last (display over all other components)
 	add(_cbxPalette, "button1", "tests"); // add as last (display over all other components)
+	add(_cbxPaletteAction, "button1", "tests"); // add as last (display over all other components)
 
 	centerAllSurfaces();
 
@@ -87,54 +114,33 @@ TestState::TestState()
 
 	_txtPalette->setText(tr("STR_PALETTE"));
 
-	bool isTFTD = false;
-	for (std::vector< std::pair<std::string, bool> >::const_iterator i = Options::mods.begin(); i != Options::mods.end(); ++i)
+	for (auto pal : _game->getMod()->getPalettes())
 	{
-		if (i->second)
+		if (pal.first.find("BACKUP_") != 0)
 		{
-			if (i->first == "xcom2")
-			{
-				isTFTD = true;
-				break;
-			}
+			_paletteList.push_back(pal.first);
 		}
 	}
 
-	_paletteList.push_back("PAL_GEOSCAPE");
-	_paletteList.push_back("PAL_BASESCAPE");
-	_paletteList.push_back("PAL_GRAPHS");
-	if (!isTFTD)
-	{
-		_paletteList.push_back("PAL_UFOPAEDIA");
-		_paletteList.push_back("PAL_BATTLEPEDIA");
-	}
-	_paletteList.push_back("PAL_BATTLESCAPE");
-	if (isTFTD)
-	{
-		_paletteList.push_back("PAL_BATTLESCAPE_1");
-		_paletteList.push_back("PAL_BATTLESCAPE_2");
-		_paletteList.push_back("PAL_BATTLESCAPE_3");
-	}
-
 	_cbxPalette->setOptions(_paletteList);
-	_cbxPalette->onChange((ActionHandler)&TestState::cbxPaletteChange);
 
-	_btnLowContrast->setText(tr("STR_LOW_CONTRAST"));
-	_btnLowContrast->onMouseClick((ActionHandler)&TestState::btnLowContrastClick);
-	_btnLowContrast->setVisible(false);
+	std::vector<std::string> _actionList;
+	_actionList.push_back("STR_PREVIEW");
+	_actionList.push_back("STR_TINY_BORDERLESS");
+	_actionList.push_back("STR_TINY_BORDER");
+	_actionList.push_back("STR_SMALL_LOW_CONTRAST");
+	_actionList.push_back("STR_SMALL_HIGH_CONTRAST");
+	_actionList.push_back("STR_BIG_LOW_CONTRAST");
+	_actionList.push_back("STR_BIG_HIGH_CONTRAST");
 
-	_btnHighContrast->setText(tr("STR_HIGH_CONTRAST"));
-	_btnHighContrast->onMouseClick((ActionHandler)&TestState::btnHighContrastClick);
-	_btnHighContrast->setVisible(false);
-
-	_btnPreview->setText(tr("STR_PREVIEW"));
-	_btnPreview->onMouseClick((ActionHandler)&TestState::btnLowContrastClick);
-	_btnPreview->setVisible(true);
+	_cbxPaletteAction->setOptions(_actionList);
+	_cbxPaletteAction->onChange((ActionHandler)&TestState::cbxPaletteAction);
 
 	_txtTestCase->setText(tr("STR_TEST_CASE"));
 
 	_testCases.push_back("STR_BAD_NODES");
 	_testCases.push_back("STR_ZERO_COST_MOVEMENT");
+	_testCases.push_back("STR_PALETTE_CHECK");
 
 	_cbxTestCase->setOptions(_testCases);
 	_cbxTestCase->onChange((ActionHandler)&TestState::cbxTestCaseChange);
@@ -156,6 +162,10 @@ TestState::TestState()
 
 TestState::~TestState()
 {
+	for (auto item : _vanillaPalettes)
+	{
+		delete item.second;
+	}
 }
 
 /**
@@ -183,6 +193,7 @@ void TestState::btnRunClick(Action *action)
 	{
 		case 0: testCase0(); break;
 		case 1: testCase1(); break;
+		case 2: testCase2(); break;
 		default: break;
 	}
 }
@@ -197,46 +208,205 @@ void TestState::btnCancelClick(Action *action)
 }
 
 /**
-* Updates the UI buttons.
-* @param action Pointer to an action.
-*/
-void TestState::cbxPaletteChange(Action *)
+ * Shows palette preview.
+ * @param action Pointer to an action.
+ */
+void TestState::cbxPaletteAction(Action *action)
 {
 	size_t index = _cbxPalette->getSelected();
-	if (_paletteList[index].find("PAL_BATTLESCAPE") != std::string::npos)
+	const std::string palette = _paletteList[index];
+
+	PaletteActionType type = (PaletteActionType)_cbxPaletteAction->getSelected();
+
+	_game->pushState(new TestPaletteState(palette, type));
+}
+
+void TestState::testCase2()
+{
+	_lstOutput->addRow(1, tr("STR_TESTS_STARTING").c_str());
+	if (_vanillaPalettes.empty())
 	{
-		_btnPreview->setVisible(false);
-		_btnLowContrast->setVisible(true);
-		_btnHighContrast->setVisible(true);
+		for (auto item : _paletteMetadataMap)
+		{
+			_vanillaPalettes[item.first] = new Palette();
+			_vanillaPalettes[item.first]->initBlack();
+
+			// Load from JASC file
+			const std::string& fullPath = FileMap::getFilePath(item.second.palettePath);
+			std::ifstream palFile(fullPath);
+			if (palFile.is_open())
+			{
+				std::string line;
+				std::getline(palFile, line); // header
+				std::getline(palFile, line); // file format
+				std::getline(palFile, line); // number of colors
+				int r = 0, g = 0, b = 0;
+				for (int j = 0; j < 256; ++j)
+				{
+					std::getline(palFile, line); // j-th color index
+					std::stringstream ss(line);
+					ss >> r;
+					ss >> g;
+					ss >> b;
+					_vanillaPalettes[item.first]->copyColor(j, r, g, b); // raw RGB copy, no side effects!
+				}
+				palFile.close();
+			}
+			else
+			{
+				throw Exception(fullPath + " not found");
+			}
+		}
+	}
+
+	int total = 0;
+	for (auto i : _game->getMod()->getExtraSprites())
+	{
+		std::string sheetName = i.first;
+		if (sheetName.find("_CPAL") != std::string::npos)
+		{
+			// custom palettes cannot be matched, skip
+			continue;
+		}
+
+		ExtraSprites *spritePack = i.second;
+		if (spritePack->getSingleImage())
+		{
+			const std::string& fullPath = FileMap::getFilePath((*spritePack->getSprites())[0]);
+			total += checkPalette(fullPath, spritePack->getWidth(), spritePack->getHeight());
+		}
+		else
+		{
+			for (auto j : *spritePack->getSprites())
+			{
+				int startFrame = j.first;
+				std::string fileName = j.second;
+				if (fileName.substr(fileName.length() - 1, 1) == "/")
+				{
+					const std::set<std::string>& contents = FileMap::getVFolderContents(fileName);
+					for (std::set<std::string>::iterator k = contents.begin(); k != contents.end(); ++k)
+					{
+						if (!_game->getMod()->isImageFile((*k).substr((*k).length() - 4, (*k).length())))
+							continue;
+						try
+						{
+							const std::string& fullPath = FileMap::getFilePath(fileName + *k);
+							total += checkPalette(fullPath, spritePack->getWidth(), spritePack->getHeight());
+						}
+						catch (Exception &e)
+						{
+							Log(LOG_WARNING) << e.what();
+						}
+					}
+				}
+				else
+				{
+					if (spritePack->getSubX() == 0 && spritePack->getSubY() == 0)
+					{
+						const std::string& fullPath = FileMap::getFilePath(fileName);
+						total += checkPalette(fullPath, spritePack->getWidth(), spritePack->getHeight());
+					}
+					else
+					{
+						const std::string& fullPath = FileMap::getFilePath((*spritePack->getSprites())[startFrame]);
+						total += checkPalette(fullPath, spritePack->getWidth(), spritePack->getHeight());
+					}
+				}
+			}
+		}
+	}
+
+	if (total > 0)
+	{
+		_lstOutput->addRow(1, tr("STR_TESTS_ERRORS_FOUND").arg(total).c_str());
+		_lstOutput->addRow(1, tr("STR_DETAILED_INFO_IN_LOG_FILE").c_str());
 	}
 	else
 	{
-		_btnPreview->setVisible(true);
-		_btnLowContrast->setVisible(false);
-		_btnHighContrast->setVisible(false);
+		_lstOutput->addRow(1, tr("STR_TESTS_NO_ERRORS_FOUND").c_str());
 	}
+	_lstOutput->addRow(1, tr("STR_TESTS_FINISHED").c_str());
 }
 
-/**
-* Shows palette preview with low contrast.
-* @param action Pointer to an action.
-*/
-void TestState::btnLowContrastClick(Action *action)
+int TestState::checkPalette(const std::string& fullPath, int width, int height)
 {
-	size_t index = _cbxPalette->getSelected();
-	const std::string palette = _paletteList[index];
-	_game->pushState(new TestPaletteState(palette, false));
+	Surface *image = new Surface(width, height);
+	image->loadImage(fullPath);
+
+	SDL_Palette *palette = image->getSurface()->format->palette;
+	if (!palette)
+	{
+		Log(LOG_ERROR) << "Image doesn't have a palette at all! Full path: " << fullPath;
+		delete image;
+		return 1;
+	}
+
+	int ncolors = image->getSurface()->format->palette->ncolors;
+	if (ncolors != 256)
+	{
+		Log(LOG_ERROR) << "Image palette doesn't have 256 colors! Full path: " << fullPath;
+	}
+
+	int bestMatch = 0;
+	int matchedPaletteIndex = 0;
+	for (auto item : _vanillaPalettes)
+	{
+		int match = matchPalette(image, item.first, item.second);
+		if (match > bestMatch)
+		{
+			bestMatch = match;
+			matchedPaletteIndex = item.first;
+		}
+		if (match == 100)
+		{
+			break;
+		}
+	}
+
+	delete image;
+
+	if (bestMatch < 100)
+	{
+		Log(LOG_INFO) << "Best match: " << bestMatch << "%; palette: " << _paletteMetadataMap[matchedPaletteIndex].paletteName << "; path: " << fullPath;
+		return 1;
+	}
+
+	return 0;
 }
 
-/**
-* Shows palette preview with high contrast.
-* @param action Pointer to an action.
-*/
-void TestState::btnHighContrastClick(Action *action)
+int TestState::matchPalette(Surface *image, int index, Palette *test)
 {
-	size_t index = _cbxPalette->getSelected();
-	const std::string palette = _paletteList[index];
-	_game->pushState(new TestPaletteState(palette, true));
+	SDL_Color *colors = image->getSurface()->format->palette->colors;
+	int matched = 0;
+
+	int firstIndexToCheck = _paletteMetadataMap[index].firstIndexToCheck;
+	int lastIndexToCheck = _paletteMetadataMap[index].lastIndexToCheck;
+	int maxTolerance = _paletteMetadataMap[index].maxTolerance;
+	bool usesBackPals = _paletteMetadataMap[index].usesBackPals;
+
+	for (int i = firstIndexToCheck; i <= lastIndexToCheck; i++)
+	{
+		if (usesBackPals)
+		{
+			if (i >= 224 && i <= 239)
+			{
+				// don't check and consider matched
+				matched++;
+				continue;
+			}
+		}
+
+		Uint8 rdiff = (colors[i].r > test->getColors(i)->r ? colors[i].r - test->getColors(i)->r : test->getColors(i)->r - colors[i].r);
+		Uint8 gdiff = (colors[i].g > test->getColors(i)->g ? colors[i].g - test->getColors(i)->g : test->getColors(i)->g - colors[i].g);
+		Uint8 bdiff = (colors[i].b > test->getColors(i)->b ? colors[i].b - test->getColors(i)->b : test->getColors(i)->b - colors[i].b);
+
+		if (rdiff <= maxTolerance && gdiff <= maxTolerance && bdiff <= maxTolerance)
+		{
+			matched++;
+		}
+	}
+
+	return matched * 100 / (lastIndexToCheck - firstIndexToCheck + 1);
 }
 
 void TestState::testCase1()

@@ -31,6 +31,23 @@ class ComboBox;
 class TextList;
 class MapBlock;
 class RuleTerrain;
+class Palette;
+
+struct PaletteTestMetadata {
+	std::string paletteName;
+	int firstIndexToCheck;
+	int lastIndexToCheck;
+	int maxTolerance;
+	std::string palettePath;
+	bool usesBackPals;
+
+	PaletteTestMetadata() {};
+	PaletteTestMetadata(const std::string &_paletteName, int _firstIndexToCheck, int _lastIndexToCheck, int _maxTolerance, const std::string &_palettePath, bool _usesBackPals) :
+		paletteName(_paletteName), firstIndexToCheck(_firstIndexToCheck), lastIndexToCheck(_lastIndexToCheck), maxTolerance(_maxTolerance), palettePath(_palettePath), usesBackPals(_usesBackPals)
+	{
+		// empty
+	};
+};
 
 /**
  * A state for testing most common modding mistakes.
@@ -39,16 +56,20 @@ class TestState : public State
 {
 private:
 	Window *_window;
-	TextButton *_btnLowContrast, *_btnHighContrast, *_btnPreview;
 	TextButton *_btnRun, *_btnCancel;
 	Text *_txtPalette;
 	Text *_txtTitle, *_txtTestCase, *_txtDescription;
 	ComboBox *_cbxPalette;
+	ComboBox *_cbxPaletteAction;
 	ComboBox *_cbxTestCase;
 	TextList *_lstOutput;
 	std::vector<std::string> _paletteList;
+	std::map<int, Palette*> _vanillaPalettes;
 	std::vector<std::string> _testCases;
 	/// Test cases.
+	void testCase2();
+	int checkPalette(const std::string& fullPath, int width, int height);
+	int matchPalette(Surface *image, int index, Palette *test);
 	void testCase1();
 	int checkMCD(RuleTerrain *terrainRule, std::map<std::string, std::set<int>> &uniqueResults);
 	void testCase0();
@@ -65,12 +86,8 @@ public:
 	void btnRunClick(Action *action);
 	/// Handler for clicking the Cancel button.
 	void btnCancelClick(Action *action);
-	/// Handler for changing the Palette combobox.
-	void cbxPaletteChange(Action *action);
-	/// Handler for clicking the LowContrast button.
-	void btnLowContrastClick(Action *action);
-	/// Handler for clicking the HighContrast button.
-	void btnHighContrastClick(Action *action);
+	/// Handler for selecting the Palette Action from the combobox.
+	void cbxPaletteAction(Action *action);
 };
 
 }

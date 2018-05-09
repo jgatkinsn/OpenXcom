@@ -192,7 +192,7 @@ private:
 	std::vector<std::string> _alienMissionsIndex, _terrainIndex, _extraSpritesIndex, _customPalettesIndex, _extraSoundsIndex, _extraStringsIndex, _missionScriptIndex;
 	std::vector<std::vector<int> > _alienItemLevels;
 	std::vector<SDL_Color> _transparencies;
-	int _facilityListOrder, _craftListOrder, _itemCategoryListOrder, _itemListOrder, _researchListOrder,  _manufactureListOrder, _ufopaediaListOrder, _invListOrder;
+	int _facilityListOrder, _craftListOrder, _itemCategoryListOrder, _itemListOrder, _researchListOrder,  _manufactureListOrder, _ufopaediaListOrder, _invListOrder, _soldierListOrder;
 	size_t _modOffset;
 	std::vector<std::string> _psiRequirements; // it's a cache for psiStrengthEval
 	size_t _surfaceOffsetBigobs = 0;
@@ -218,8 +218,6 @@ private:
 	SoundSet *getSoundSet(const std::string &name, bool error = true) const;
 	/// Loads battlescape specific resources.
 	void loadBattlescapeResources();
-	/// Checks if an extension is a valid image file.
-	bool isImageFile(std::string extension) const;
 	/// Loads a specified music file.
 	Music *loadMusic(MusicFormat fmt, const std::string &file, int track, float volume, CatFile *adlibcat, CatFile *aintrocat, GMCatFile *gmcat) const;
 	/// Creates a transparency lookup table for a given palette.
@@ -284,6 +282,8 @@ public:
 	/// For internal use only
 	const std::map<std::string, int> &getUfopaediaSections() const { return _ufopaediaSections; }
 
+	/// Checks if an extension is a valid image file.
+	bool isImageFile(std::string extension) const;
 	/// Gets a particular font.
 	Font *getFont(const std::string &name, bool error = true) const;
 	/// Gets a particular surface.
@@ -298,6 +298,8 @@ public:
 	void playMusic(const std::string &name, int id = 0);
 	/// Gets a particular sound.
 	Sound *getSound(const std::string &set, unsigned int sound, bool error = true) const;
+	/// Gets all palettes.
+	const std::map<std::string, Palette*> &getPalettes() const { return _palettes; }
 	/// Gets a particular palette.
 	Palette *getPalette(const std::string &name, bool error = true) const;
 	/// Sets a new palette.
@@ -366,7 +368,9 @@ public:
 	/// Gets the available soldiers.
 	const std::vector<std::string> &getSoldiersList() const;
 	/// Gets commendation rules.
-	std::map<std::string, RuleCommendations *> getCommendation() const;
+	RuleCommendations *getCommendation(const std::string &id, bool error = false) const;
+	/// Gets the available commendations.
+	const std::map<std::string, RuleCommendations *> &getCommendationsList() const;
 	/// Gets generated unit rules.
 	Unit *getUnit(const std::string &name, bool error = false) const;
 	/// Gets alien race rules.
