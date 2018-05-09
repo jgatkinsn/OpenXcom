@@ -271,8 +271,8 @@ public:
 	void getDependableFacilities(std::vector<RuleBaseFacility*> & dependables, const RuleResearch *research, const Mod *mod) const;
 	/// Gets the status of a ufopedia rule.
 	int getUfopediaRuleStatus(const std::string &ufopediaRule);
-    /// Get the list of hidden items
-    const std::map<std::string, bool> & getHiddenPurchaseItems();
+    /// Gets the list of hidden items
+    const std::map<std::string, bool> &getHiddenPurchaseItems();
 	/// Gets the status of a manufacture rule.
 	int getManufactureRuleStatus(const std::string &manufactureRule);
 	/// Is the research new?

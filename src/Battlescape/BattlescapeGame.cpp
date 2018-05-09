@@ -899,6 +899,18 @@ void BattlescapeGame::checkForCasualties(const RuleDamageType *damageType, Battl
 	if (_save->getSide() == FACTION_PLAYER)
 	{
 		_parentState->showPsiButton(bu && bu->getSpecialWeapon(BT_PSIAMP) && !bu->isOut());
+		_parentState->showSpecialButton(false);
+
+		if (bu && !bu->isOut())
+		{
+			BattleType type = BT_NONE;
+			BattleItem *specialWeapon = bu->getSpecialIconWeapon(type); // updates type!
+			if (specialWeapon && type != BT_NONE && type != BT_AMMO && type != BT_GRENADE && type != BT_PROXIMITYGRENADE && type != BT_FLARE && type != BT_CORPSE)
+			{
+				_parentState->showPsiButton(false);
+				_parentState->showSpecialButton(true, specialWeapon->getRules()->getSpecialIconSprite());
+			}
+		}
 	}
 }
 
@@ -1911,6 +1923,7 @@ BattleUnit *BattlescapeGame::convertUnit(BattleUnit *unit)
 	bool visible = unit->getVisible();
 
 	getSave()->getBattleState()->showPsiButton(false);
+	getSave()->getBattleState()->showSpecialButton(false);
 	// in case the unit was unconscious
 	getSave()->removeUnconsciousBodyItem(unit);
 

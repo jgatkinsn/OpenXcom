@@ -295,7 +295,7 @@ Mod::Mod() :
 	_defeatScore(0), _defeatFunds(0), _startingTime(6, 1, 1, 1999, 12, 0, 0), _startingDifficulty(0),
 	_baseDefenseMapFromLocation(0),
 	_facilityListOrder(0), _craftListOrder(0), _itemCategoryListOrder(0), _itemListOrder(0),
-	_researchListOrder(0),  _manufactureListOrder(0), _ufopaediaListOrder(0), _invListOrder(0), _modOffset(0)
+	_researchListOrder(0),  _manufactureListOrder(0), _ufopaediaListOrder(0), _invListOrder(0), _soldierListOrder(0), _modOffset(0)
 {
 	_muteMusic = new Music();
 	_muteSound = new Sound();
@@ -1225,7 +1225,8 @@ void Mod::loadFile(const std::string &filename, ModScript &parsers)
 		RuleSoldier *rule = loadRule(*i, &_soldiers, &_soldiersIndex);
 		if (rule != 0)
 		{
-			rule->load(*i, this);
+			_soldierListOrder += 1;
+			rule->load(*i, this, _soldierListOrder);
 		}
 	}
 	for (YAML::const_iterator i = doc["units"].begin(); i != doc["units"].end(); ++i)
@@ -2220,10 +2221,20 @@ const std::vector<std::string> &Mod::getSoldiersList() const
 }
 
 /**
- * Gets the list of commendations
+ * Returns the rules for the specified commendation.
+ * @param id Commendation type.
+ * @return Rules for the commendation.
+ */
+RuleCommendations *Mod::getCommendation(const std::string &id, bool error) const
+{
+	return getRule(id, "Commendation", _commendations, error);
+}
+
+/**
+ * Gets the list of commendations provided by the mod.
  * @return The list of commendations.
  */
-std::map<std::string, RuleCommendations *> Mod::getCommendation() const
+const std::map<std::string, RuleCommendations *> &Mod::getCommendationsList() const
 {
 	return _commendations;
 }
