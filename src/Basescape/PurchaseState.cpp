@@ -345,61 +345,6 @@ bool PurchaseState::belongsToCategory(int sel, const std::string &cat) const
 	}
 	return false;
 }
-/**
- * Determines if a row item is supposed to be hidden
- * @param sel Selected row.
- * @param cat Category.
- * @returns True if row item is hidden
- */
-bool PurchaseState::isHidden(int sel) const
-{
-    std::string itemName;
-    bool isCraft = false;
-	switch (_items[sel].type)
-	{
-	case TRANSFER_SOLDIER:
-	case TRANSFER_SCIENTIST:
-	case TRANSFER_ENGINEER:
-		return false;
-	case TRANSFER_CRAFT:
-        isCraft = true;
-	case TRANSFER_ITEM:
-        if(isCraft)
-        {
-            RuleCraft *rule = (RuleCraft*) _items[sel].rule;
-            if(rule != 0)
-            {
-                itemName = rule->getType();
-            }
-        }
-        else
-        {
-            RuleItem *rule = (RuleItem*) _items[sel].rule;
-            if(rule != 0)
-            {
-                itemName = rule->getType();
-            }
-        }
-        if(!itemName.empty())
-        {
-            std::map<std::string, bool>::const_iterator iter;
-            std::map<std::string, bool> hiddenMap = _game->getSavedGame()->getHiddenPurchaseItems();
-            iter = hiddenMap.find(itemName);
-            if(iter != hiddenMap.end())
-            {
-                return iter->second;
-            }
-            else
-            {
-                //not found, so assume it's not hidden
-                _game->getSavedGame()->setHiddenPurchaseItemsStatus(itemName, false);
-                return false;
-            }
-        }
-	}
-	return false;
-
-}
 
 /**
  * Determines if a row item is supposed to be hidden
