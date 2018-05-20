@@ -356,6 +356,7 @@ RuleCraft *Craft::getRules() const
 void Craft::changeRules(RuleCraft *rules)
 {
 	_rules = rules;
+	_stats = rules->getStats();
 	_weapons.clear();
 	for (int i = 0; i < _rules->getWeapons(); ++i)
 	{
@@ -1474,6 +1475,8 @@ void Craft::unload(const Mod *mod)
 		{
 			_base->getStorageItems()->addItem((*w)->getRules()->getLauncherItem());
 			_base->getStorageItems()->addItem((*w)->getRules()->getClipItem(), (*w)->getClipsLoaded(mod));
+			delete (*w);
+			(*w) = 0;
 		}
 	}
 
@@ -1491,7 +1494,10 @@ void Craft::unload(const Mod *mod)
 		{
 			_base->getStorageItems()->addItem((*v)->getRules()->getPrimaryCompatibleAmmo()->front(), (*v)->getAmmo());
 		}
+		delete (*v);
+		(*v) = 0;
 	}
+	_vehicles.clear();
 
 	// Remove soldiers
 	for (std::vector<Soldier*>::iterator s = _base->getSoldiers()->begin(); s != _base->getSoldiers()->end(); ++s)

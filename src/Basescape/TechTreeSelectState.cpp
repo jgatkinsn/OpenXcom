@@ -144,6 +144,7 @@ void TechTreeSelectState::initLists()
 	CrossPlatform::upperCase(searchString, myLocale);
 
 	_firstManufacturingTopicIndex = 0;
+	_firstFacilitiesTopicIndex = 0;
 	_availableTopics.clear();
 	_lstTopics->clearList();
 
@@ -213,6 +214,75 @@ void TechTreeSelectState::initLists()
 		_lstTopics->addRow(1, ss.str().c_str());
 		++row;
 	}
+
+	_firstFacilitiesTopicIndex = row;
+
+	const std::vector<std::string> &facilityItems = _game->getMod()->getBaseFacilitiesList();
+	for (std::vector<std::string>::const_iterator i = facilityItems.begin(); i != facilityItems.end(); ++i)
+	{
+		if (Options::techTreeViewerSpoilerProtection)
+		{
+			if (!_parent->isDiscoveredFacility(*i))
+				continue;
+		}
+		std::wstring facilityName = tr((*i));
+		CrossPlatform::upperCase(facilityName, myLocale);
+		if (searchString == L"SHAZAM")
+		{
+			if (_parent->isDiscoveredFacility(*i))
+			{
+				continue;
+			}
+		}
+		else if (facilityName.find(searchString) == std::string::npos)
+		{
+			continue;
+		}
+
+		_availableTopics.push_back(*i);
+		std::wostringstream ss;
+		ss << tr((*i));
+		ss << tr("STR_F_FLAG");
+		_lstTopics->addRow(1, ss.str().c_str());
+		++row;
+	}
+
+	_firstItemTopicIndex = row;
+
+	const std::vector<std::string> &itemsList = _game->getMod()->getItemsList();
+	for (std::vector<std::string>::const_iterator i = itemsList.begin(); i != itemsList.end(); ++i)
+	{
+		if (!_parent->isProtectedItem(*i))
+		{
+			// items that are not protected at all are irrelevant for the Tech Tree Viewer!
+			continue;
+		}
+		if (Options::techTreeViewerSpoilerProtection)
+		{
+			if (!_parent->isProtectedAndDiscoveredItem(*i))
+				continue;
+		}
+		std::wstring itemName = tr((*i));
+		CrossPlatform::upperCase(itemName, myLocale);
+		if (searchString == L"SHAZAM")
+		{
+			if (_parent->isProtectedAndDiscoveredItem(*i))
+			{
+				continue;
+			}
+		}
+		else if (itemName.find(searchString) == std::string::npos)
+		{
+			continue;
+		}
+
+		_availableTopics.push_back(*i);
+		std::wostringstream ss;
+		ss << tr((*i));
+		ss << tr("STR_I_FLAG");
+		_lstTopics->addRow(1, ss.str().c_str());
+		++row;
+	}
 }
 
 /**
@@ -226,9 +296,22 @@ void TechTreeSelectState::onSelectTopic(Action *)
 		return;
 
 	const std::string selectedTopic = _availableTopics[index];
-	bool isManufacturingTopic = index >= _firstManufacturingTopicIndex;
 
-	_parent->setSelectedTopic(selectedTopic, isManufacturingTopic);
+	TTVMode topicType = TTV_RESEARCH;
+	if (index >= _firstItemTopicIndex)
+	{
+		topicType = TTV_ITEMS;
+	}
+	else if (index >= _firstFacilitiesTopicIndex)
+	{
+		topicType = TTV_FACILITIES;
+	}
+	else if (index >= _firstManufacturingTopicIndex)
+	{
+		topicType = TTV_MANUFACTURING;
+	}
+
+	_parent->setSelectedTopic(selectedTopic, topicType);
 
 	_game->popState();
 }
